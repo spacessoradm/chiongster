@@ -1,0 +1,248 @@
+/* General container for all pages */
+.container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background: rgb(238, 235, 235);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Required for floating elements */
+  overflow: hidden; /* Ensure floating elements don't overflow the container */
+  z-index: 1;
+  
+}
+
+/* Headers */
+.header {
+  text-align: center;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Input fields */
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 12px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: #333;
+  font-size: 16px;
+  background-color: #f8f8f8;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+  background-color: #ffffff;
+}
+
+/* Buttons */
+.login-button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background-color: #4caf50;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.login-button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.login-button:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+/* Sign-up Link */
+.signup-link {
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: #45a049;
+  text-decoration: underline;
+}
+
+/* Footer link text */
+.footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Error Message */
+.error-message {
+  color: #f44336;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+  text-align: right;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.forgot-password-button {
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-button:hover {
+  color: #45a049;
+  text-decoration: underline;
+}
+
+/* Floating shapes animation */
+@keyframes moveShapes {
+  0% {
+    transform: translateY(100vh) rotate(0deg); /* Start below the screen */
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-150vh) rotate(360deg); /* Move above the screen */
+    opacity: 0;
+  }
+}
+
+.floating-shape {
+  position: fixed; /* Ensure full-screen movement */
+  bottom: -200px; /* Start below the viewport */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999; /* Bring it to the front */
+  opacity: 0.5;
+  animation: moveShapes linear infinite;
+  pointer-events: none; /* Prevent blocking clicks */
+}
+
+/* Shape Sizes and Animations */
+.shape-1 {
+  width: 120px;
+  height: 120px;
+  left: 10%;
+  background-color: rgba(76, 175, 80, 0.5); /* Light green */
+  animation-duration: 8s;
+}
+
+.shape-2 {
+  width: 80px;
+  height: 80px;
+  left: 30%;
+  background-color: rgba(139, 69, 19, 0.5); /* Sienna */
+  animation-duration: 10s;
+}
+
+.shape-3 {
+  width: 140px;
+  height: 140px;
+  left: 70%;
+  background-color: rgba(187, 11, 99, 0.5); /* Pink */
+  animation-duration: 12s;
+}
+
+.shape-4 {
+  width: 150px;
+  height: 150px;
+  left: 90%;
+  background-color: rgba(0, 162, 255, 0.5); /* Blue */
+  animation-duration: 15s;
+}
+
+
+
+/* Responsive breakpoints */
+
+/* Large screens (1024px and above) */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 600px;
+    padding: 40px;
+  }
+
+  .header {
+    font-size: 26px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  .login-button {
+    font-size: 18px;
+  }
+}
+
+/* Medium screens (768px and above) */
+@media (max-width: 768px) {
+  .container {
+    max-width: 550px;
+    padding: 30px;
+  }
+
+  .header {
+    font-size: 22px;
+  }
+
+  input {
+    font-size: 15px;
+  }
+
+  .login-button {
+    font-size: 16px;
+  }
+}
+
+/* Small screens (480px and above) */
+@media (max-width: 480px) {
+  .container {
+    max-width: 400px;
+    padding: 20px;
+  }
+
+  .header {
+    font-size: 20px;
+  }
+
+  input {
+    font-size: 14px;
+  }
+
+  .login-button {
+    font-size: 15px;
+  }
+}

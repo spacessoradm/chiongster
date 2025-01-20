@@ -1,0 +1,107 @@
+/* EditUser.css */
+
+.custom-textarea {
+  width: 100%; /* Full width */
+  background-color: #ffffff; /* White background */
+  color: #000000; /* Black text color */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  padding: 8px; /* Padding inside the textarea */
+  font-size: 16px; /* Font size */
+  resize: none; /* Prevent resizing (optional) */
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+.custom-textarea:focus {
+  outline: none; /* Removes default focus outline */
+  border-color: #007bff; /* Highlight border on focus (optional) */
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Adds focus shadow */
+}
+
+
+.edit-user-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .admin-content {
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 40px;
+    width: 100%;
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  input[type="text"],
+  input[type="date"],
+  select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  select:focus {
+    border-color: #4caf50;
+    outline: none;
+  }
+  
+  button[type="submit"] {
+    background-color: #4caf50;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  .current-picture {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  
+  input[type="file"] {
+    padding: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
