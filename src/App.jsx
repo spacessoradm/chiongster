@@ -8,14 +8,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
 // Client Components
-import HorizontalNavbar from './containers/Client/Navigation/HorizontalNavBar';
+/*import HorizontalNavbar from './containers/Client/Navigation/HorizontalNavBar';
 import BottomNavBar from './containers/Client/Navigation/BottomNavBar';
 import Dashboard from './containers/Client/Dashboard';
 import Inventory from './containers/Client/Inventory/index.jsx';
 import Notification from './containers/Client/Notification';
 import Scan from './containers/Client/Scan';
 import RecipeNavigation from './containers/Client/Recipe/RecipeNavigation';
-import Profile from './containers/Client/Profile';
+import Profile from './containers/Client/Profile';*/
 
 // Admin Components
 import AdminLayout from './components/AdminLayout';
@@ -112,10 +112,6 @@ const App = () => {
             {/* Conditional Navigation Rendering */}
             {userRole === "client" ? (
                 <>
-                    <HorizontalNavbar />
-                    <div className="stickyBottom">
-                        <BottomNavBar />
-                    </div>
                 </>
             ) : userRole === "admin" ? (
                 <SideNavBar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
@@ -148,11 +144,6 @@ const App = () => {
                     {/* Client Routes */}
                     {userRole === "client" && (
                         <>
-                            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                            <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-                            <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
-                            <Route path="/recipes/*" element={<ProtectedRoute><RecipeNavigation /></ProtectedRoute>} />
-                            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                         </>
                     )}
 
