@@ -37,7 +37,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/Chiongster/', // Ensure this matches your repository name
+  base: '/', // Ensure this matches your repository name
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
