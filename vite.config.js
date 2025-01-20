@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      base: '/Chiongster/',
+      base: '/',
       registerType: 'autoUpdate',
       manifest: {
         name: 'Chiongster',
