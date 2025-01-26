@@ -1,0 +1,29 @@
+.pagination-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .pagination-button {
+    cursor: pointer;
+    font-size: 24px;
+    color: #007bff;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .pagination-button:hover {
+    transform: scale(1.1);
+  }
+  
+  .pagination-button.disabled {
+    cursor: not-allowed;
+    color: #ccc;
+  }
+  
+  .pagination-info {
+    font-size: 16px;
+    color: #333;
+  }
+  
