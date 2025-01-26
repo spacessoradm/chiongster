@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+import './CreateBooking.css';
 
 const CreateBooking = () => {
     const navigate = useNavigate();
@@ -105,6 +106,9 @@ const CreateBooking = () => {
                 <h2>Create Booking</h2>
                 <button className="back-btn" onClick={() => navigate('/admin/venuecategory')}>
                     Back to Nooking List
+                </button>
+                <button className="back-btn" onClick={toggleModal}>
+                    Redeem Item
                 </button>
             </div>
 

@@ -147,6 +147,7 @@ const EditAppUser = () => {
                     <div className="form-group">
                         <label>User Name:</label>
                         <input
+                            className="enhanced-input"
                             type="text"
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
@@ -157,6 +158,7 @@ const EditAppUser = () => {
                     <div className="form-group">
                         <label>First Name:</label>
                         <input
+                            className="enhanced-input"
                             type="text"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
@@ -167,6 +169,7 @@ const EditAppUser = () => {
                     <div className="form-group">
                         <label>Last Name:</label>
                         <input
+                            className="enhanced-input"
                             type="text"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
@@ -177,6 +180,7 @@ const EditAppUser = () => {
                     <div className="form-group">
                         <label>Email:</label>
                         <input
+                            className="enhanced-input"
                             type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -187,6 +191,7 @@ const EditAppUser = () => {
                     <div className="form-group">
                         <label>Phone:</label>
                         <input
+                        c   className="enhanced-input"
                             type="text"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}

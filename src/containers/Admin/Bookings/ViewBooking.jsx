@@ -135,7 +135,7 @@ const ViewBooking = () => {
               width: "100%",
               borderCollapse: "collapse",
               marginTop: "20px",
-              fontFamily: "Arial, sans-serif",
+              fontFamily: "Courier New",
             }}
           >
             <thead>

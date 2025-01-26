@@ -60,7 +60,7 @@ const EditVenueCategory = () => {
     };
 
     return (
-        <div className="edit-venue-category-container">
+        <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
             <div className="admin-content">
                 <h2>Edit Venue Category</h2>
                 <form onSubmit={handleSubmit}>

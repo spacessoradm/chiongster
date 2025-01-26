@@ -128,8 +128,8 @@ const Bookings = () => {
   };
 
   return (
-    <div className='venue-category'>
-      <h1>Manage Booking</h1>
+    <div className='venue-category' style={{ fontFamily: "Courier New" }}>
+      <h2>Manage Booking</h2>
       <p></p>
 
       <div style={{ marginBottom: "20px", display: "flex", gap: "10px", fontFamily: "Courier New" }}>

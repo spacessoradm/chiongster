@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
+import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+
+import SearchBar from '../../../components/SearchBarSection';
+import Toast from '../../../components/Toast';
+import Pagination from '../../../components/pagination';
 
 const Venues = () => {
     const navigate = useNavigate();
@@ -12,9 +17,15 @@ const Venues = () => {
     const [searchTerm, setSearchTerm] = useState(""); // For search functionality
     const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "desc" }); // Default sorting
     const [page, setPage] = useState(1); // Current page
-    const [totalPages, setTotalPages] = useState(1); // Total pages
+    const [totalPages, setTotalPages] = useState(1);
+    const limit = 10;
+    const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
-    const limit = 10; // Number of venues per page
+    const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+  };
+
 
     // Fetch recipes from Supabase
     const fetchVenues = async (pageNumber = 1) => {
@@ -23,18 +34,42 @@ const Venues = () => {
         try {
             const start = (pageNumber - 1) * limit;
             const end = start + limit - 1;
-
-            const { data, count, error } = await supabase
-                .from("venues") // Ensure this matches your Supabase table name
-                .select("*", { count: "exact" }) // Include count to calculate total pages
-                .order(sortConfig.key, { ascending: sortConfig.direction === "asc" })
-                .range(start, end); // Paginate results
+          
+            const { data: venuesData, error: venuesDataError } = await supabase
+                  .from('venues')
+                  .select('id, address,venue_name, pic_path, venue_category_id, created_at')
+                  .range(start, end);
+          
+            if (venuesDataError) throw venuesDataError;
+          
+            const { data: venueCategoryData, error: venueCategoryDataError } = await supabase
+                .from('venue_category')
+                .select('id, category_name')
+          
+            if (venueCategoryDataError) throw venueCategoryDataError;
+        
+          
+            venuesData.forEach(venue => {
+                  const venueCategory = venueCategoryData.find(venueCategory => venueCategory.id === venue.venue_category_id);
+                  if (venueCategory) {
+                    venue.venue_category_name = venueCategory.category_name;
+                  }
+                });
 
             if (error) throw error;
 
-            setVenues(data);
-            setFilteredVenues(data); // Initialize filtered data
-            setTotalPages(Math.ceil(count / limit)); // Calculate total pages
+            setVenues(venuesData);
+            setFilteredVenues(venuesData);
+
+            console.log(venuesData);
+
+            setToastInfo({ visible: true, message: 'Data fetched successfully', type: 'success' });
+
+            const { count } = await supabase
+                .from('venues')
+                .select('id', { count: 'exact', head: true });
+
+            setTotalPages(Math.ceil(count / limit));
         } catch (err) {
             setError("Failed to fetch venues.");
             console.error(err);
@@ -83,7 +118,9 @@ const Venues = () => {
         fetchVenues(page);
     }, [page]);
 
-    const deleteVenues = async () => {}
+    const handleRefresh = () => fetchVenues(page);
+
+    const handleCreate = () => navigate("create");
 
     const deleteVenue = async (id, imagePath) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this venue?");
@@ -94,7 +131,7 @@ const Venues = () => {
     
             // Step 1: Delete the image from Supabase Storage
             const { error: storageError } = await supabase.storage
-                .from("venue-main") // Replace with your actual bucket name
+                .from("venue-main")
                 .remove([imagePath]); // Pass the path to the file
     
             if (storageError) {
@@ -130,54 +167,20 @@ const Venues = () => {
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
             <h1 style={{ color: "#333" }}>Manage Venues</h1>
 
-            {/* Search and Refresh */}
-            <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
-                <input
-                    type="text"
-                    placeholder="Search venues..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    style={{
-                        padding: "10px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        width: "100%",
-                        maxWidth: "400px",
-                    }}
-                />
-                <button
-                    onClick={() => fetchVenues(page)}
-                    style={{
-                        padding: "10px 20px",
-                        borderRadius: "4px",
-                        border: "none",
-                        backgroundColor: "#4CAF50",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
-                >
-                    Refresh
-                </button>
-                <button
-                    onClick={() => navigate("create")} // Navigate to the create page
-                    style={{
-                        padding: "10px 20px",
-                        borderRadius: "4px",
-                        border: "none",
-                        backgroundColor: "#4CAF50",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
-                >
-                    Create Venue
-                </button>
-            </div>
+            <SearchBar
+                searchTerm={searchTerm}
+                onSearch={handleSearch}
+                onRefresh={handleRefresh}
+                onCreate={handleCreate}
+            />
 
-            {/* Show loading state */}
-            {loading && <p>Loading venues...</p>}
+            {loading && (
+                <p className="loading-message">Loading items...</p>
+            )}
 
-            {/* Show error state */}
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
 
             {/* Display venues */}
             {!loading && !error && filteredVenues.length > 0 ? (
@@ -225,7 +228,7 @@ const Venues = () => {
                                     Address {sortConfig.key === "address" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
-                                    onClick={() => handleSort("venue_category")}
+                                    onClick={() => handleSort("venue_category_name")}
                                     style={{
                                         border: "1px solid #ccc",
                                         padding: "10px",
@@ -233,7 +236,7 @@ const Venues = () => {
                                         cursor: "pointer",
                                     }}
                                 >
-                                    Category {sortConfig.key === "venue_category" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                                    Category {sortConfig.key === "venue_category_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
                                     onClick={() => handleSort("created_at")}
@@ -253,108 +256,36 @@ const Venues = () => {
                         <tbody>
                             {filteredVenues.map((venue) => (
                                 <tr key={venue.id}>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>{venue.id}</td>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>{venue.venue_name}</td>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>{venue.address}</td>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>{venue.prep_time}</td>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>{new Date(venue.created_at).toLocaleString()}</td>
-                                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>
+                                    <td className="normal-column">{venue.id}</td>
+                                    <td className="normal-column">{venue.venue_name}</td>
+                                    <td className="normal-column">{venue.address}</td>
+                                    <td className="normal-column">{venue.venue_category_name}</td>
+                                    <td className="normal-column">{new Date(venue.created_at).toLocaleString()}</td>
+                                    <td className="normal-column">
                                         <img
                                             src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${venue.pic_path}`}
                                             alt={venue.name}
                                             style={{ width: "50px", height: "50px", objectFit: "cover" }}
                                         />
                                     </td>
-                                    <td
-                                        style={{
-                                            border: "1px solid #ccc",
-                                            padding: "10px",
-                                            textAlign: "center",
-                                        }}
-                                    >
-
-                                        <button
-                                            onClick={() => navigate(``)} // Navigate to the detail page
-                                            style={{
-                                                marginRight: "10px",
-                                                padding: "8px 12px",
-                                                cursor: "pointer",
-                                                backgroundColor: "#FFA500",
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "4px",
-                                            }}
-                                        >
-                                            View
-                                        </button>
-
-                                        <button
-                                            onClick={() => navigate(``)} // Navigate to the edit page
-                                            style={{
-                                                marginRight: "10px",
-                                                padding: "8px 12px",
-                                                cursor: "pointer",
-                                                backgroundColor: "#2196F3",
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "4px",
-                                            }}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => deleteVenues()}
-                                            style={{
-                                                padding: "8px 12px",
-                                                cursor: "pointer",
-                                                backgroundColor: "#f44336",
-                                                color: "white",
-                                                border: "none",
-                                                borderRadius: "4px",
-                                            }}
-                                        >
-                                            Delete
-                                        </button>
+                                    <td className='action-column'>
+                                        
+                                        <FaTrashAlt 
+                                        onClick={() => deleteVenue(venue.id)}
+                                        title='Delete'
+                                        className='delete-button'
+                                        />
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
 
-                    {/* Pagination Controls */}
-                    <div style={{ marginTop: "20px", textAlign: "center" }}>
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            style={{
-                                marginRight: "10px",
-                                padding: "8px 12px",
-                                backgroundColor: "#2196F3",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: page === 1 ? "not-allowed" : "pointer",
-                            }}
-                        >
-                            Previous
-                        </button>
-                        <span>Page {page} of {totalPages}</span>
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            style={{
-                                marginLeft: "10px",
-                                padding: "8px 12px",
-                                backgroundColor: "#2196F3",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: page === totalPages ? "not-allowed" : "pointer",
-                            }}
-                        >
-                            Next
-                        </button>
-                    </div>
+                    <Pagination
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
                 </>
             ) : (
                 !loading && <p>No venues found.</p>

@@ -91,6 +91,7 @@ const CreateUser = () => {
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
                     <input
+                        className='enhanced-input'
                         type="email"
                         id="email"
                         name="email"
@@ -103,6 +104,7 @@ const CreateUser = () => {
                 <div className="form-group">
                     <label htmlFor="username">Username:</label>
                     <input
+                    className='enhanced-input'
                         type="text"
                         id="username"
                         name="username"

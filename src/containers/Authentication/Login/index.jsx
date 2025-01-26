@@ -3,6 +3,7 @@ import { useState } from 'react';
 import supabase from '../../../config/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import Toast from '../../../components/Toast';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -11,30 +12,39 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+    const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+    };
+
     const handleEmailLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
+            // Helper function to wait for a specific time
+            const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
 
             if (error) {
-                // Handle specific Supabase auth errors
                 if (error.status === 400) {
-                    alert('Invalid credentials. Please try again.');
+                    showToast('Invalid credentials. Please try again.', 'error')
                 } else if (error.status === 404) {
-                    alert('Invalid accounts. Please contact IT support.');
+                    showToast('Invalid accounts. Please contact IT support.', 'error')
                 } else {
-                    alert(`Login failed: ${error.message}`);
+                    showToast(`Login failed: ${error.message}`, 'error')
                 }
                 throw error;
+            } else {
+                showToast('Login successful!', 'success')
+                await delay(3000);
             }
-
-            alert('Login successful!');
-
-            // Fetch user_id from admin_profile
+            
             const { data: adminProfileData, error: adminProfileError } = await supabase
                 .from('profiles')
                 .select('id')
@@ -46,7 +56,6 @@ const Login = () => {
                 throw adminProfileError;
             }
 
-            // Fetch role_id from user_roles
             const { data: userRoleData, error: roleError } = await supabase
                 .from('user_roles')
                 .select('role_id')
@@ -58,7 +67,6 @@ const Login = () => {
                 throw roleError;
             }
 
-            // Fetch role_name from roles table using role_id
             const { data: roleData, error: roleNameError } = await supabase
                 .from('roles')
                 .select('role_name')
@@ -71,23 +79,9 @@ const Login = () => {
             }
 
             const roleName = roleData.role_name.trim().toLowerCase();
-
-            // Update role in context
             updateUserRole(roleName);
 
-            // Check the user's profile for a username (only for clients)
             if (roleName === 'admin') {
-                /*const { data: adminProfileData, error: adminProfileError } = await supabase
-                    .from('admin_profile') // Assuming user profile information is stored here
-                    .select('username')
-                    .eq('unique_user_id', data.user.id)
-                    .single();
-
-                if (adminProfileError) {
-                    console.error('Error fetching admin profile:', adminProfileError);
-                    throw adminProfileError;
-                }*/
-
                 navigate('/admin/dashboard');
             } else {
                 throw new Error(`Unknown role: ${roleName}`);
@@ -101,48 +95,57 @@ const Login = () => {
     };
 
     return (
-        <div className="container">
-            <div className="floating-shape shape-1"></div>
-            <div className="floating-shape shape-2"></div>
-            <div className="floating-shape shape-3"></div>
-            <div className="floating-shape shape-4"></div>
+        <div className="login-page">
 
-            <h1 className="header">Login</h1>
-            <form onSubmit={handleEmailLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                {/* Forgot Password Link */}
-                <p className="forgot-password-link">
-                    <button 
-                        type="button" 
-                        className="forgot-password-button" 
-                        onClick={() => navigate('/forgetpassword')}
-                    >
-                        Forgot Password?
-                    </button>
-                </p>
-                <button type="submit" className="login-button" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
-            </form>
-            <p className="footer">
-                Don't have an account?{' '}
-                <button className="signup-link" onClick={() => navigate('/signup')}>
-                    Sign Up
-                </button>
-            </p>
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
+            
+            {/* Loading Overlay */}
+                {loading && (
+                <div className="loading-overlay">
+                    <div className="spinner"></div>
+                </div>
+            )}
+
+            <div className="login-container">
+                <div className="login-form">
+                    <h1>Start your journey</h1>
+                    <h2>Sign In to Chionster ADMIN</h2>
+                    <form className='form-body' onSubmit={handleEmailLogin}>
+                        <div className="input-group">
+                            <input
+                                type="email"
+                                placeholder="example@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="input-group">
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button type="submit" disabled={loading}>
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
+                    </form>
+                    <p className="footer">
+                        Forgot Password?{' '}
+                        <span onClick={() => navigate('/forgetpassword')}>Click Here</span>
+                    </p>
+                    <p>
+                        Don't have an account?{' '}
+                        <span onClick={() => navigate('/signup')}>Sign Up</span>
+                    </p>
+                </div>
+                <div className="login-banner"></div>
+            </div>
         </div>
     );
 };

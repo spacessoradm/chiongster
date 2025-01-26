@@ -8,12 +8,6 @@ const CreateVenue = () => {
     const [venueCategories, setVenueCategories] = useState([]);
 
     const [activeTab, setActiveTab] = useState(0);
-    const [stepsData, setStepsData] = useState({
-        tab1: { name: "" },
-        tab2: { option: "", description: "" },
-        tab3: { images: [] },
-    });
-
 
     const [formData, setFormData] = useState({
         venue_name: "",
@@ -29,12 +23,19 @@ const CreateVenue = () => {
         playability: "",
         minimum_tips: "",
         venue_category_id: "",
-        category_ids: [], // Now an array
-        tag_ids: [],
-        equipment_ids: [],
-        damage: [{ title: "", pax: "", min_spend: "", amenities: "", happy_hours: "", night_hours: "", morning_hours: "" }],
+        damage: [
+            {
+                title: "",
+                pax: "",
+                min_spend: "",
+                amenities: "",
+                happy_hours: "",
+                night_hours: "",
+                morning_hours: "",
+            },
+        ],
         menu: [{ item_name: "", item_description: "", original_price: "", discounted_price: "" }],
-        gallery: [{ title: "", type: "", path: null }],
+        gallery: [{ venue_id: "", type: "Gallery", image_path: "" }],
         pic_path: null,
     });
 
@@ -52,16 +53,15 @@ const CreateVenue = () => {
 
     const handleSaveVenue = async () => {
         try {
-          const imageFile = formData.image; // Assuming `formData.image` contains the file
+          const imageFile = formData.pic_path; // Assuming `formData.pic_path` contains the file
           let imagePath = null;
-      
+    
           if (imageFile) {
-            imagePath = await handleImageUpload(imageFile, formData.name); // Pass the recipe name
+            imagePath = await handleImageUpload(imageFile, formData.venue_name); // Upload the image and get the path
           }
-      
-          // Save the venue, including the imagePath
+    
           const { data: venueData, error } = await supabase
-            .from('venues')
+            .from("venues")
             .insert({
               venue_name: formData.venue_name,
               address: formData.address,
@@ -75,55 +75,71 @@ const CreateVenue = () => {
               playability: formData.playability,
               minimum_tips: formData.minimum_tips,
               venue_category_id: formData.venue_category_id,
-              pic_path: pic_path,
+              pic_path: imagePath, // Save the uploaded image path
               created_at: new Date().toISOString(),
-              modified_at: new Date().toISOString(), // Save the uploaded image path
+              modified_at: new Date().toISOString(),  
             })
             .select()
             .single();
-      
+    
           if (error) throw error;
-
+    
           const venueID = venueData.id;
-
-          console.log('Venue id:', venueID);
-          // Save related data
-          await handleSaveVenueDamage(venueID, formData.damages);
-
-      
-          console.log('Venue saved successfully:', venueData);
-
-          
-          navigate("/admin/venues"); // Navigate back to the recipe list
+    
+          // Save related data (damage, menu, etc.)
+          await handleSaveVenueDamage(venueID, formData.damage);
+          await handleSaveVenueMenu(venueID, formData.menu);
+    
+          navigate("/admin/venues"); // Navigate back to the venue list page
         } catch (error) {
-          console.error('Error saving recipe:', error.message);
+          console.error('Error saving venue:', error.message);
         }
       };
-        
-    const handleSaveVenueDamage = async (venueId, damage) => {
+    
+      const handleSaveVenueDamage = async (venueId, damage) => {
         try {
-            if (damage.length > 0) {
-                const venueDamages = damage.map((damage, index) => ({
-                    venue_id: venueId,
-                    title: damage.title,
-                    pax: damage.pax,
-                    min_spend: damage.min_spend,
-                    amenities: damage.amenities,
-                    happy_hours: damage.happy_hours,
-                    night_hours: damage.night_hours,
-                    morning_hours: damage.morning_hours,
-                    created_at: Date.now(),
-                    updated_at: Date.now(),
-                }));
+          if (damage.length > 0) {
+            const venueDamages = damage.map((group) => ({
+              venue_id: venueId,
+              title: group.title,
+              pax: group.pax,
+              min_spend: group.min_spend,
+              amenities: group.amenities,
+              happy_hours: group.happy_hours,
+              night_hours: group.night_hours,
+              morning_hours: group.morning_hours,
+              created_at: new Date().toISOString(),
+              modified_at: new Date().toISOString(),  
+            }));
     
-                const { error } = await supabase.from("venue_damage").insert(venueDamages);
-                if (error) throw error;
-    
-            }
+            const { error } = await supabase.from("venue_damage").insert(venueDamages);
+            if (error) throw error;
+          }
         } catch (error) {
-            console.error("Error saving venue damage:", error.message);
+          console.error("Error saving venue damage:", error.message);
         }
-    };
+      };
+    
+      const handleSaveVenueMenu = async (venueId, menu) => {
+        try {
+          if (menu.length > 0) {
+            const venueMenu = menu.map((item) => ({
+              venue_id: venueId,
+              item_name: item.item_name,
+              item_description: item.item_description,
+              original_price: item.original_price,
+              created_at: new Date().toISOString(),
+              modified_at: new Date().toISOString(),  
+            }));
+    
+            const { error } = await supabase.from("venue_menu").insert(venueMenu);
+            console.log("what is the error?", error);
+            if (error) throw error;
+          }
+        } catch (error) {
+          console.error("Error saving venue menu:", error.message);
+        }
+      };
 
     const handleStepChange = (index, value) => {
         setFormData((prev) => ({
@@ -148,8 +164,90 @@ const CreateVenue = () => {
         }));
     };
 
-    /* Tab 1: Venue Damage */
+    const handleTabChange = (index) => setActiveTab(index);
+
+    /* Tab 0: Venue Damage */
+    const handleDamageChange = (index, field, value) => {
+        setFormData((prev) => {
+          const updatedDamage = [...prev.damage];
+          updatedDamage[index][field] = value;
+          return { ...prev, damage: updatedDamage };
+        });
+      };
     
+      const addDamageGroup = () => {
+        setFormData((prev) => ({
+          ...prev,
+          damage: [
+            ...prev.damage,
+            {
+              title: "",
+              pax: "",
+              min_spend: "",
+              amenities: "",
+              happy_hours: "",
+              night_hours: "",
+              morning_hours: "",
+            },
+          ],
+        }));
+      };
+    
+      const removeDamageGroup = (index) => {
+        setFormData((prev) => ({
+          ...prev,
+          damage: prev.damage.filter((_, i) => i !== index),
+        }));
+      };
+    
+      const handleMenuChange = (index, field, value) => {
+        setFormData((prev) => {
+          const updatedMenu = [...prev.menu];
+          updatedMenu[index][field] = value;
+          return { ...prev, menu: updatedMenu };
+        });
+      };
+
+      const addMenuGroup = () => {
+        setFormData((prev) => ({
+          ...prev,
+          menu: [
+            ...prev.menu,
+            {
+              item_name: "",
+              item_description: "",
+              original_price: "",
+            },
+          ],
+        }));
+      };
+    
+      const removeMenuGroup = (index) => {
+        setFormData((prev) => ({
+          ...prev,
+          menu: prev.menu.filter((_, i) => i !== index),
+        }));
+      };
+
+      const handleImageUpload = async (file, venueName) => {
+        try {
+            const fileName = `${venueName}_${new Date().toISOString().replace(/[:.]/g, "-")}`;
+
+          const { data, error } = await supabase.storage
+                .from('venue_main') // Name of your bucket
+                .upload(fileName, file, {
+                cacheControl: '3600', // Optional: Cache control
+                upsert: false, // Avoid overwriting
+                });
+      
+          if (error) throw error;
+      
+          const imagePath = `venue_main/${data.path}`;
+          return imagePath;
+        } catch (error) {
+          console.error("Error uploading image:", error.message);
+        }
+      };
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
@@ -158,69 +256,85 @@ const CreateVenue = () => {
             <div>
                 <label>Venue Name:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
                     required
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Address:</label>
                 <textarea
+                    className="enhanced-input"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
+
+                <label>Category:</label>
+                <select
+                    id="venue_category"
+                    value={formData.venue_category_id}
+                    onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
+                    className="mt-1 block w-full bg-black text-white border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                    <option value="">Select a category</option>
+                    {venueCategories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                            {category.category_name}
+                        </option>
+                    ))}
+                </select>
 
                 <label>Happy Hours:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.happy_hours}
                     onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Night Hours:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.night_hours}
                     onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Morning Hours:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.morning_hours}
                     onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Opening Hours:</label>
                 <textarea
+                    className="enhanced-input"
                     value={formData.opening_hours}
                     onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Price:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
                 <label>Drink Min Spend:</label>
                 <input
+                    className="enhanced-input"
                     type="text"
                     value={formData.drink_min_spend}
                     onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
                 />
 
-                <label>Image: (only file with &lt;1mb allowed)</label>
+                <label>Image: (only file with &lt; 1mb allowed)</label>
                 <input
+                    className="enhanced-input"
                     type="file"
                     onChange={(e) => setFormData({ ...formData, pic_path: e.target.files[0] })}
                 />
@@ -229,109 +343,105 @@ const CreateVenue = () => {
             {/* Tabs Navigation */}
             <div style={{ display: "flex", marginBottom: "20px" }}>
                 {["General Info", "Steps", "Media"].map((tab, index) => (
-                    <div
-                        key={index}
-                        onClick={() => setActiveTab(index)}
-                        style={{
-                            cursor: "pointer",
-                            padding: "10px 20px",
-                            backgroundColor: activeTab === index ? "#4CAF50" : "#f0f0f0",
-                            color: activeTab === index ? "white" : "black",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            marginRight: "5px",
-                        }}
-                    >
-                        {tab}
-                    </div>
+                <div
+                    key={index}
+                    onClick={() => handleTabChange(index)}
+                    style={{
+                    cursor: "pointer",
+                    padding: "10px 20px",
+                    backgroundColor: activeTab === index ? "#4CAF50" : "#f0f0f0",
+                    color: activeTab === index ? "white" : "black",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                    marginRight: "5px",
+                    }}
+                >
+                    {tab}
+                </div>
                 ))}
             </div>
 
-            {/* Tabs Content */}
+            {/* Tab Content */}
             {activeTab === 0 && (
-            <div>
+                <div>
                 <h2>Damage Details</h2>
-                {formData.damage.map((venue, index) => (
-                <div
+                {formData.damage.map((group, index) => (
+                    <div
                     key={index}
-                    style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    marginBottom: "10px",
-                    borderRadius: "5px",
-                    }}
-                >
+                    className="enhanced-input"
+                    >
                     <label>Title:</label>
                     <input
-                    type="text"
-                    value={formData.damage.title}
-                    onChange={(e) =>
+                        type="text"
+                        value={group.title}
+                        onChange={(e) =>
                         handleDamageChange(index, "title", e.target.value)
-                    }
-                    required
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Number of Pax:</label>
                     <input
-                    type="number"
-                    value={formData.damage}
-                    onChange={(e) => handleDamageChange(index, "pax", e.target.value)}
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        type="text"
+                        value={group.pax}
+                        onChange={(e) =>
+                        handleDamageChange(index, "pax", e.target.value)
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Min Spend:</label>
                     <input
-                    type="number"
-                    value={formData.damage.minSpend}
-                    onChange={(e) =>
-                        handleDamageChange(index, "minSpend", e.target.value)
-                    }
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        type="text"
+                        value={group.min_spend}
+                        onChange={(e) =>
+                        handleDamageChange(index, "min_spend", e.target.value)
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Amenities:</label>
                     <textarea
-                    value={formData.damage.amenities}
-                    onChange={(e) =>
+                        value={group.amenities}
+                        onChange={(e) =>
                         handleDamageChange(index, "amenities", e.target.value)
-                    }
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Happy Hours:</label>
                     <input
-                    type="text"
-                    value={formData.damage.happyHours}
-                    onChange={(e) =>
-                        handleDamageChange(index, "happyHours", e.target.value)
-                    }
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        type="text"
+                        value={group.happy_hours}
+                        onChange={(e) =>
+                        handleDamageChange(index, "happy_hours", e.target.value)
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Night Hours:</label>
                     <input
-                    type="text"
-                    value={formData.damage.nightHours}
-                    onChange={(e) =>
-                        handleDamageChange(index, "nightHours", e.target.value)
-                    }
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        type="text"
+                        value={group.night_hours}
+                        onChange={(e) =>
+                        handleDamageChange(index, "night_hours", e.target.value)
+                        }
+                        className="enhanced-input"
                     />
 
                     <label>Morning Hours:</label>
                     <input
-                    type="text"
-                    value={formData.damage.morningHours}
-                    onChange={(e) =>
-                        handleDamageChange(index, "morningHours", e.target.value)
-                    }
-                    style={{ width: "100%", margin: "5px 0", padding: "10px" }}
+                        type="text"
+                        value={group.morning_hours}
+                        onChange={(e) =>
+                        handleDamageChange(index, "morning_hours", e.target.value)
+                        }
+                        className="enhanced-input"
                     />
 
                     <button
-                    onClick={() => removeDamageGroup(index)}
-                    style={{
+                        onClick={() => removeDamageGroup(index)}
+                        style={{
                         background: "#f44336",
                         color: "white",
                         border: "none",
@@ -339,15 +449,16 @@ const CreateVenue = () => {
                         padding: "5px 10px",
                         cursor: "pointer",
                         marginTop: "10px",
-                    }}
+                        width: "15%",
+                        }}
                     >
-                    Remove Group
+                        Remove Group
                     </button>
-                </div>
+                    </div>
                 ))}
                 <button
-                onClick={addDamageGroup}
-                style={{
+                    onClick={addDamageGroup}
+                    style={{
                     marginTop: "10px",
                     padding: "10px 20px",
                     backgroundColor: "#4CAF50",
@@ -355,49 +466,67 @@ const CreateVenue = () => {
                     border: "none",
                     borderRadius: "4px",
                     cursor: "pointer",
-                }}
+                    width: "25%",
+                    }}
                 >
-                + Add Damage
+                    + Add Damage Group
                 </button>
-            </div>
+                </div>
             )}
-
 
             {activeTab === 1 && (
                 <div style={{ marginTop: "20px" }}>
-                    <h2>Steps</h2>
-                    {formData.steps.map((step, index) => (
-                        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                            <textarea
-                                value={step.description}
-                                onChange={(e) => handleStepChange(index, e.target.value)}
-                                placeholder={`Step ${index + 1}`}
-                                style={{
-                                    width: "90%",
-                                    padding: "10px",
-                                    borderRadius: "5px",
-                                    border: "1px solid #ccc",
-                                    marginRight: "10px",
-                                }}
+                    <h2>Menu</h2>
+                    {formData.menu.map((groupMenu, index) => (
+                        <div key={index} className="enhanced-input">
+
+                            <label>Item Name:</label>
+                            <input
+                                type="text"
+                                value={groupMenu.item_name}
+                                onChange={(e) =>
+                                handleMenuChange(index, "item_name", e.target.value)
+                                }
+                                className="enhanced-input"
+                            />
+                            <label>Item Description:</label>
+                            <input
+                                type="text"
+                                value={groupMenu.item_description}
+                                onChange={(e) =>
+                                handleMenuChange(index, "item_description", e.target.value)
+                                }
+                                className="enhanced-input"
+                            />
+                            <label>Amount:</label>
+                            <input
+                                type="text"
+                                value={groupMenu.original_price}
+                                onChange={(e) =>
+                                handleMenuChange(index, "original_price", e.target.value)
+                                }
+                                className="enhanced-input"
                             />
                             <button
-                                onClick={() => removeStep(index)}
+                                onClick={() => removeMenuGroup(index)}
                                 style={{
-                                    background: "#f44336",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    padding: "5px 10px",
-                                    cursor: "pointer",
+                                background: "#f44336",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                padding: "5px 10px",
+                                cursor: "pointer",
+                                marginTop: "10px",
+                                width: "15%",
                                 }}
                             >
-                                Remove
+                                Remove Menu Group
                             </button>
-                        </div>
-                    ))}
-                    <button
-                        onClick={addStep}
-                        style={{
+                            </div>
+                        ))}
+                        <button
+                            onClick={addMenuGroup}
+                            style={{
                             marginTop: "10px",
                             padding: "10px 20px",
                             backgroundColor: "#4CAF50",
@@ -405,28 +534,61 @@ const CreateVenue = () => {
                             border: "none",
                             borderRadius: "4px",
                             cursor: "pointer",
-                        }}
-                    >
-                        + Add 
-                    </button>
+                            width: "25%",
+                            }}
+                        >
+                            + Add Menu Group
+                        </button>
                 </div>
             )}
 
             {activeTab === 2 && (
-                <div>
-                    <label>Image: (only file with &lt;1mb allowed)</label>
-                    <input
-                        type="file"
-                        onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-                        style={{ margin: "10px 0" }}
-                    />
-                    {formData.image && (
-                        <div>
-                            <p>Selected File: {formData.image.name}</p>
-                        </div>
-                    )}
+                <div style={{ marginTop: "20px" }}>
+                    <h2>Image Upload</h2>
+
+                    {/* Promotions Upload */}
+                    <div style={{ marginBottom: "20px" }}>
+                    </div>
+
+                    {/* Gallery Upload */}
+                    <div>
+                        <label>Gallery: (only files &lt;1MB allowed)</label>
+                        <input
+                            type="file"
+                            multiple
+                            onChange={(e) => handleFileUpload(e, "gallery")}
+                            style={{ margin: "10px 0" }}
+                        />
+                        {formData.gallery.length > 0 && (
+                            <div>
+                                <h4>Selected Gallery Files:</h4>
+                                <ul>
+                                    {formData.gallery.map((file, index) => (
+                                        <li key={index}>
+                                            {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                                            <button
+                                                onClick={() => removeFile("gallery", index)}
+                                                style={{
+                                                    marginLeft: "10px",
+                                                    color: "white",
+                                                    backgroundColor: "#f44336",
+                                                    border: "none",
+                                                    borderRadius: "4px",
+                                                    padding: "5px",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Remove
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
+
 
             <button
                 onClick={handleSaveVenue}
@@ -439,7 +601,7 @@ const CreateVenue = () => {
                     borderRadius: "4px",
                 }}
             >
-                Save Recipe
+                Save
             </button>
         </div>
     );

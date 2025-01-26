@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+import './EditBooking.css';
 
 const EditBooking = () => {
     const navigate = useNavigate();
@@ -16,6 +17,55 @@ const EditBooking = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+        item_name: "",
+        quantity: "",
+        amount: "",
+    });
+    const [message, setMessage] = useState("");
+
+    const toggleModal = () => {
+      setShowModal(!showModal);
+      setMessage(""); // Reset any messages when the modal is toggled
+    };
+  
+    // Handle form input changes
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    };
+
+    // Handle Redemption form submission
+    const handleRedemptionSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+        const { data, error } = await supabase
+            .from("redemption")
+            .insert([
+            {
+                booking_id: id,
+                item_name: formData.item_name,
+                quantity: parseInt(formData.quantity, 10),
+                amount: parseFloat(formData.amount),
+                created_at: new Date().toISOString(),
+                modified_at: new Date().toISOString(),
+            },
+            ]);
+
+        if (error) throw error;
+
+        setMessage("Redemption details added successfully!");
+        setFormData({ item_name: "", quantity: "", amount: "" }); // Reset form fields
+        } catch (error) {
+        setMessage(`Error: ${error.message}`);
+        }
+    };
 
     // Fetch venues, users, and existing booking data
     useEffect(() => {
@@ -106,17 +156,20 @@ const EditBooking = () => {
     };
 
     return (
-        <div className="edit-booking-container">
+        <div className="edit-booking-container" style={{ fontFamily: 'Courier New' }}>
             <div className="edit-booking-header">
                 <h2>Edit Booking</h2>
                 <button className="back-btn" onClick={() => navigate('/admin/bookings')}>
                     Back to Booking List
                 </button>
+                <button className="open-modal-btn" style={{ marginLeft: '10px' }} onClick={toggleModal}>
+                    Redeem a drink
+                </button>
             </div>
 
             {error && <div className="error-message">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="edit-booking-form">
+            <form onSubmit={handleSubmit} className="edit-booking-form" style={{ paddingTop: '20px' }}>
 
                 <div className="form-group">
                     <label>User:</label>
@@ -211,6 +264,58 @@ const EditBooking = () => {
                     {loading ? 'Updating...' : 'Update Booking'}
                 </button>
             </form>
+
+            {/* Modal */}
+            {showModal && (
+            <div className="modal-overlay">
+            <div className="modal-content">
+                <h2>Redemption Details</h2>
+                {message && <p>{message}</p>}
+                <form className="redemption-form" onSubmit={handleRedemptionSubmit}>
+                <div className="form-group">
+                    <label>Item Name:</label>
+                    <input
+                    type="text"
+                    name="item_name"
+                    value={formData.item_name}
+                    onChange={handleInputChange}
+                    required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Quantity:</label>
+                    <input
+                    type="number"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleInputChange}
+                    required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Amount:</label>
+                    <input
+                    type="number"
+                    step="0.01"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                    required
+                    />
+                </div>
+
+                <button type="submit" className="submit-btn">
+                    Submit
+                </button>
+                </form>
+                <button className="close-modal-btn" onClick={toggleModal}>
+                Close
+                </button>
+            </div>
+            </div>
+        )}
         </div>
     );
 };

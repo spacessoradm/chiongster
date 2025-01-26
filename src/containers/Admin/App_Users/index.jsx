@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
 import './index.css';
+import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+import SearchBar from '../../../components/SearchBarSection';
+import Toast from '../../../components/Toast';
+import Pagination from '../../../components/pagination';
 
 const AppUsers = () => {
   const navigate = useNavigate();
@@ -14,8 +18,13 @@ const AppUsers = () => {
   const [sortConfig, setSortConfig] = useState({ key: "username", direction: "asc" }); // Default sorting
   const [page, setPage] = useState(1); // Current page
   const [totalPages, setTotalPages] = useState(1); // Total pages
+  const limit = 10;
+  const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
-  const limit = 10; 
+  const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+  };
 
   const fetchUsers = async (pageNumber = 1) => {
     setLoading(true);
@@ -27,7 +36,8 @@ const AppUsers = () => {
       // Fetch users from auth.users
       const { data: users, error: usersError } = await supabase
         .from('profiles')
-        .select('id, username, unique_id');
+        .select('id, username, unique_id')
+        .range(start, end);
 
       if (usersError) throw usersError;
 
@@ -138,39 +148,20 @@ const AppUsers = () => {
     }
   };
 
+  const handleRefresh = () => fetchItems(page);
+
+  const handleCreate = () => navigate("create");
+
   return (
     <div className='app-users'>
       <h1>Manage Users</h1>
 
-      {/* Search and Refresh */}
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{
-            padding: "10px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            width: "100%",
-            maxWidth: "400px",
-          }}
-        />
-        <button
-          onClick={() => fetchUsers(page)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "4px",
-            border: "none",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Refresh
-        </button>
-      </div>
+      <SearchBar
+                searchTerm={searchTerm}
+                onSearch={handleSearch}
+                onRefresh={handleRefresh}
+                onCreate={handleCreate}
+      />
 
       {/* Show loading state */}
       {loading && <p>Loading users...</p>}
@@ -219,51 +210,25 @@ const AppUsers = () => {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{user.id}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{user.username}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{user.role}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>
-                  <button
-                    onClick={() => navigate(`/admin/appusers/view/${user.id}`)}
-                    style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#FFA500",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                    }}
-                  >
-                    View
-                  </button>
-                    <button
+                  <td className='normal-column'>{user.id}</td>
+                  <td className='normal-column'>{user.username}</td>
+                  <td className='normal-column'>{user.role}</td>
+                  <td className='action-column'>
+                    <FaEye
+                      onClick={() => navigate(`/admin/appusers/view/${user.id}`)}
+                      title='View'
+                      className='view-button'
+                    />
+                    <FaEdit 
                       onClick={() => navigate(`/admin/appusers/edit/${user.id}`)}
-                      style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#2196F3",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteUser(user.id)}
-                      style={{
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#f44336",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Delete
-                    </button>
+                      title='Edit'
+                      className='edit-button'
+                    />
+                    <FaTrashAlt 
+                      onClick={() => deleteItem(user.id)}
+                      title='Delete'
+                      className='delete-button'
+                    />
                   </td>
                 </tr>
               ))}
@@ -271,39 +236,11 @@ const AppUsers = () => {
           </table>
 
           {/* Pagination Controls */}
-          <div style={{ marginTop: "20px", textAlign: "center" }}>
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              style={{
-                marginRight: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              Previous
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              style={{
-                marginLeft: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       ) : (
         !loading && <p>No users found.</p>

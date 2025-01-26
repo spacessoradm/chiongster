@@ -43,6 +43,11 @@ const adminNavBarItems = [
         dropdown: true, // Indicates dropdown
         items: [
             {
+                title: "Manage Redeem Items",
+                link: "/admin/redeemitems",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Venue",
                 link: "/admin/venuecategory",
                 icon: <FaListAlt />,

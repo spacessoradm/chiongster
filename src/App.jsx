@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import Login from './containers/Authentication/Login/index';
 import ForgetPassword from './containers/Authentication/ForgetPassword/index';
+import ResetPassword from './containers/Authentication/ResetPassword/index';
 import Signup from './containers/Authentication/Registration';
 //import supabase from './config/supabaseClient';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -80,6 +81,11 @@ import CreateBooking from './containers/Admin/Bookings/CreateBooking';
 import ViewBooking from './containers/Admin/Bookings/ViewBooking';
 import EditBooking from './containers/Admin/Bookings/EditBooking';
 
+import RedeemItems from './containers/Admin/Redeem_Items/index.jsx';
+import CreateRedeemItem from './containers/Admin/Redeem_Items/CreateRedeemItem';
+import ViewRedeemItem from './containers/Admin/Redeem_Items/ViewRedeemItem';
+import EditRedeemItem from './containers/Admin/Redeem_Items/EditRedeemItem';
+
 const App = () => {
     const { userRole } = useAuth();
     const [loading, setLoading] = useState(false);
@@ -139,6 +145,7 @@ const App = () => {
                     {/* Authentication Routes */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/forgetpassword" element={<ForgetPassword />} />
+                    <Route path="/resetpassword" element={<ResetPassword />} />
                     <Route path="/signup" element={<Signup />} />
 
                     {/* Client Routes */}
@@ -294,6 +301,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditBooking/>
+                                    </AdminLayout>
+                                }
+                            />
+
+<Route
+                                path="/admin/redeemitems"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <RedeemItems />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/redeemitems/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateRedeemItem />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/redeemitems/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewRedeemItem/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/redeemitems/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditRedeemItem/>
                                     </AdminLayout>
                                 }
                             />

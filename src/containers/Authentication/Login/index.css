@@ -1,248 +1,173 @@
-/* General container for all pages */
-.container {
-  max-width: 500px;
-  margin: 50px auto;
-  padding: 30px;
-  background: rgb(238, 235, 235);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  font-family: 'Roboto', sans-serif;
+/* General styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Login Page Container */
+.login-page {
+  display: flex;
+  height: 100vh;
+}
+
+.login-container {
+  display: flex;
+  width: 100%;
+}
+
+/* Form Section */
+.login-form {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  position: relative; /* Required for floating elements */
-  overflow: hidden; /* Ensure floating elements don't overflow the container */
-  z-index: 1;
-  
-}
-
-/* Headers */
-.header {
-  text-align: center;
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-/* Input fields */
-input {
-  width: 100%;
-  padding: 14px;
-  margin: 12px 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  color: #333;
-  font-size: 16px;
-  background-color: #f8f8f8;
-  transition: all 0.3s ease;
-}
-
-input:focus {
-  outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+  padding: 2rem 4rem;
   background-color: #ffffff;
 }
 
-/* Buttons */
-.login-button {
+.login-form h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-form h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.form-body{
+  width: 60%;
+}
+
+/* Input Group */
+.input-group {
+  position: relative;
   width: 100%;
-  padding: 14px;
-  margin-top: 20px;
-  background-color: #4caf50;
-  color: white;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
-.login-button:hover {
-  background-color: #45a049;
-  transform: translateY(-2px);
+.input-group input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  background-color: #fff !important;
+  color: #000;
+  transition: border 0.3s ease;
 }
 
-.login-button:disabled {
-  background-color: #bbb;
-  cursor: not-allowed;
+.input-group input:focus {
+  border-color: #007bff;
 }
 
-/* Sign-up Link */
-.signup-link {
-  background: none;
-  border: none;
-  color: #4caf50;
-  font-size: 14px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.signup-link:hover {
-  color: #45a049;
-  text-decoration: underline;
-}
-
-/* Footer link text */
-.footer {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
+.input-group .icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
   color: #666;
 }
 
-/* Error Message */
-.error-message {
-  color: #f44336;
-  font-size: 14px;
-  text-align: center;
-  margin-top: 10px;
-}
-
-/* Forgot Password Link */
-.forgot-password-link {
-  text-align: right;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.forgot-password-button {
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: #4caf50;
-  font-size: 14px;
-  text-decoration: none;
+  font-size: 1rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  color: #666;
 }
 
-.forgot-password-button:hover {
-  color: #45a049;
+/* Button */
+button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+/* Footer */
+.footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.footer span {
+  color: #007bff;
+  cursor: pointer;
+}
+
+.footer span:hover {
   text-decoration: underline;
 }
 
-/* Floating shapes animation */
-@keyframes moveShapes {
-  0% {
-    transform: translateY(100vh) rotate(0deg); /* Start below the screen */
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(-150vh) rotate(360deg); /* Move above the screen */
-    opacity: 0;
-  }
+/* Banner Section */
+.login-banner {
+  flex: 1;
+  background: url('C:\Users\chong\Downloads\Chiongster-admin-main\src\assets\images\Chiongster_Login.jpg') no-repeat center center;
+  background-size: cover;
 }
 
-.floating-shape {
-  position: fixed; /* Ensure full-screen movement */
-  bottom: -200px; /* Start below the viewport */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999; /* Bring it to the front */
-  opacity: 0.5;
-  animation: moveShapes linear infinite;
-  pointer-events: none; /* Prevent blocking clicks */
+/* Blur effect when loading */
+.blur {
+  filter: blur(5px);
+  pointer-events: none;
+  opacity: 0.3;
 }
 
-/* Shape Sizes and Animations */
-.shape-1 {
-  width: 120px;
-  height: 120px;
-  left: 10%;
-  background-color: rgba(76, 175, 80, 0.5); /* Light green */
-  animation-duration: 8s;
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* White transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Lower than toast */
 }
 
-.shape-2 {
-  width: 80px;
-  height: 80px;
-  left: 30%;
-  background-color: rgba(139, 69, 19, 0.5); /* Sienna */
-  animation-duration: 10s;
+/* Spinner styles */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #007bff; /* Blue color for the spinner */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.shape-3 {
-  width: 140px;
-  height: 140px;
-  left: 70%;
-  background-color: rgba(187, 11, 99, 0.5); /* Pink */
-  animation-duration: 12s;
-}
-
-.shape-4 {
-  width: 150px;
-  height: 150px;
-  left: 90%;
-  background-color: rgba(0, 162, 255, 0.5); /* Blue */
-  animation-duration: 15s;
-}
-
-
-
-/* Responsive breakpoints */
-
-/* Large screens (1024px and above) */
-@media (max-width: 1024px) {
-  .container {
-    max-width: 600px;
-    padding: 40px;
+/* Spinner animation */
+@keyframes spin {
+  from {
+      transform: rotate(0deg);
   }
-
-  .header {
-    font-size: 26px;
-  }
-
-  input {
-    font-size: 16px;
-  }
-
-  .login-button {
-    font-size: 18px;
-  }
-}
-
-/* Medium screens (768px and above) */
-@media (max-width: 768px) {
-  .container {
-    max-width: 550px;
-    padding: 30px;
-  }
-
-  .header {
-    font-size: 22px;
-  }
-
-  input {
-    font-size: 15px;
-  }
-
-  .login-button {
-    font-size: 16px;
-  }
-}
-
-/* Small screens (480px and above) */
-@media (max-width: 480px) {
-  .container {
-    max-width: 400px;
-    padding: 20px;
-  }
-
-  .header {
-    font-size: 20px;
-  }
-
-  input {
-    font-size: 14px;
-  }
-
-  .login-button {
-    font-size: 15px;
+  to {
+      transform: rotate(360deg);
   }
 }

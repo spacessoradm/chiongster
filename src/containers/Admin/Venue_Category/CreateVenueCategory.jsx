@@ -46,7 +46,7 @@ const CreateVenueCategory = () => {
     };
 
     return (
-        <div className="create-venue-category-container">
+        <div className="create-venue-category-container" style={{ fontFamily: "Courier New" }}>
             <div className="create-venue-category-header">
                 <h2>Create New Venue Category</h2>
                 <button className="back-btn" onClick={() => navigate('/admin/venuecategory')}>
@@ -56,7 +56,7 @@ const CreateVenueCategory = () => {
 
             {error && <div className="error-message">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="create-venue-category-form">
+            <form onSubmit={handleSubmit} className="create-venue-category-form" style={{ paddingTop: "20px" }}>
                 <div className="form-group">
                     <label htmlFor="categoryName">Category Name:</label>
                     <input

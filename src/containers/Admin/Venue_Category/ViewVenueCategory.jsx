@@ -70,7 +70,7 @@ const ViewVenueCategory = () => {
             <BackButton />
 
             {/* Action Buttons */}
-            <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
             </div>
             <div className="edit-user-container">
             <div className="admin-content">
