@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      base: '/',
+      base: '/Chiongster/',
       registerType: 'autoUpdate',
       manifest: {
         name: 'Chiongster',
@@ -37,7 +37,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/', // Ensure this matches your repository name
+  base: '/Chiongster/', // Ensure this matches your repository name
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
