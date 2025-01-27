@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+import './EditRedeemItem.css';
+import BackButton from "../../../components/Button/BackArrowButton";
+import Toast from '../../../components/Toast';
 
 const EditRedeemItem = () => {
     const navigate = useNavigate();
@@ -15,6 +18,12 @@ const EditRedeemItem = () => {
     const [venues, setVenues] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+    const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+    };
 
     // Fetch venues when the component loads
     useEffect(() => {
@@ -51,6 +60,7 @@ const EditRedeemItem = () => {
                     venueId: data.venue_id,
                 });
             } catch (err) {
+                showToast(`Error fetching redeem item: ${err.message}`, 'error')
                 console.error('Error fetching redeem item:', err);
             }
         };
@@ -94,29 +104,29 @@ const EditRedeemItem = () => {
 
     return (
         <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <div className="edit-venue-category-header">
-                <h2>Edit Redeem Item</h2>
-                <button className="back-btn" onClick={() => navigate('/admin/redeemitems')}>
-                    Back to Redeem Items List
-                </button>
-            </div>
+            <BackButton to="/admin/redeemitems" /> 
+            <h2>Edit Redeem Item</h2>
 
-            {error && <div className="error-message">{error}</div>}
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
 
-            <form onSubmit={handleSubmit} className="edit-venue-category-form" style={{ paddingTop: "20px" }}>
-                <div className="form-group">
-                    <label htmlFor="itemName">Item Name:</label>
-                    <input
-                        type="text"
-                        id="itemName"
-                        name="itemName"
-                        value={formData.itemName}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+            <form onSubmit={handleSubmit} className="outsider">
+                <div className="insider">
+                    <div className="field-container">
+                        <label htmlFor="itemName">Item Name:</label>
+                        <input
+                            className='enhanced-input'
+                            type="text"
+                            id="itemName"
+                            name="itemName"
+                            value={formData.itemName}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div className="form-group">
+                <div className="field-container">
                     <label htmlFor="itemDescription">Item Description:</label>
                     <textarea
                         id="itemDescription"
@@ -128,9 +138,10 @@ const EditRedeemItem = () => {
                     ></textarea>
                 </div>
 
-                <div className="form-group">
+                <div className="field-container">
                     <label htmlFor="itemAmount">Amount:</label>
                     <input
+                        className='enhanced-input'
                         type="text"
                         id="itemAmount"
                         name="itemAmount"
@@ -140,9 +151,10 @@ const EditRedeemItem = () => {
                     />
                 </div>
 
-                <div className="form-group">
+                <div className="field-container">
                     <label htmlFor="venueId">Venue:</label>
                     <select
+                        className='enhanced-input'
                         id="venueId"
                         name="venueId"
                         value={formData.venueId}
@@ -157,10 +169,11 @@ const EditRedeemItem = () => {
                         ))}
                     </select>
                 </div>
-
                 <button type="submit" className="submit-btn" disabled={loading}>
                     {loading ? 'Updating...' : 'Update Redeem Item'}
                 </button>
+
+                </div>
             </form>
         </div>
     );

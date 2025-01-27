@@ -1,14 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from '../../../config/supabaseClient';
-import './ViewVenueCategory.css';   
+import './ViewRecommendedTag.css';   
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
-const ViewVenueCategory = () => {
+const ViewRecommendedTag = () => {
     const { id } = useParams();
     const navigate = useNavigate(); 
-    const [venueCategory, setVenueCategory] = useState(null);
+    const [recommendedTag, setRecommendedTag] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDisabled, setIsDisabled] = useState(false);
@@ -20,60 +20,38 @@ const ViewVenueCategory = () => {
     };
 
     useEffect(() => {
-        const fetchVenueCategoryDetails = async () => { 
+        const fetchRecommendedTagDetails = async () => { 
             setLoading(true);
             setError(null);
     
             try {
-                const { data: venueCategoryData, error: venueCategoryDataError } = await supabase
-                    .from("venue_category")
+                const { data: recommendedTagData, error: recommendedTagDataError } = await supabase
+                    .from("recommended_tags")
                     .select("*")
                     .eq("id", id)
                     .single();
-                if (venueCategoryDataError) throw venueCategoryDataError;
+                if (recommendedTagDataError) throw recommendedTagDataError;
     
-                setVenueCategory(venueCategoryData);
+                setRecommendedTag(recommendedTagData);
     
             } catch (err) {
-                showToast("Failed to fetch category details.", "error");
+                showToast("Failed to fetch recommended tag details.", "error");
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
     
-        fetchVenueCategoryDetails();
+        fetchRecommendedTagDetails();
     }, [id]);
 
-    const deleteVenueCategory = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this category?");
-        if (!confirmDelete) return;
-
-        try {
-            setLoading(true);
-
-            const { error: venueCategoryError } = await supabase
-                .from("venue_category")
-                .delete()
-                .eq("id", id);
-
-            if (venueCategoryError) throw venueCategoryError;
-
-            navigate("/admin/venuecategory"); // Redirect after deletion
-        } catch (err) {
-            showToast("Failed to delete category.", "error");
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
     
-    if (loading) return <p>Loading category...</p>;
+    if (loading) return <p>Loading recommended tag...</p>;
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <BackButton to="/admin/venuecategory" />    
-            <h2>Venue Category Details</h2>
+            <BackButton to="/admin/recommendedtags" />    
+            <h2>Recommended Tag Details</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -82,20 +60,20 @@ const ViewVenueCategory = () => {
             <form className="outsider">
                 <div className="insider">
                     <div className="field-container">
-                        <label>Venue Name:</label>
+                        <label>Tag Name:</label>
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.category_name}
+                            value={recommendedTag.tag_name}
                             disabled={isDisabled}
                         />
                     </div>
                     <div className="field-container">
-                        <label>Venue Description:</label>
+                        <label>Status:</label>
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.description}
+                            value={recommendedTag.status}
                             disabled={isDisabled}
                         />
                     </div>
@@ -104,7 +82,7 @@ const ViewVenueCategory = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.created_at}
+                            value={recommendedTag.created_at}
                             disabled={isDisabled}
                         />
                     </div>
@@ -116,4 +94,4 @@ const ViewVenueCategory = () => {
     );
 };
 
-export default ViewVenueCategory;
+export default ViewRecommendedTag;

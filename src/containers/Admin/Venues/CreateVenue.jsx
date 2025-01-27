@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 import supabase from "../../../config/supabaseClient";
-import SortableIngredientList from "../../../components/SortableDragAndDrop/Ingredient_List";
+
+import "./CreateVenue.css";
+import BackButton from '../../../components/Button/BackArrowButton';
+import Toast from '../../../components/Toast';
 
 const CreateVenue = () => {
     const navigate = useNavigate();
     const [venueCategories, setVenueCategories] = useState([]);
-
+    const [recommendedTags, setRecommendedTags] = useState([]);
+    const [languages, setLanguages] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
-
     const [formData, setFormData] = useState({
         venue_name: "",
         address: "",
@@ -19,7 +23,8 @@ const CreateVenue = () => {
         recommended: "",
         price: "",
         drink_min_spend: "",
-        language: "",
+        recommended_tags_id: "",
+        language_id: "",
         playability: "",
         minimum_tips: "",
         venue_category_id: "",
@@ -38,6 +43,12 @@ const CreateVenue = () => {
         gallery: [{ venue_id: "", type: "Gallery", image_path: "" }],
         pic_path: null,
     });
+    const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+    const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+    };
 
     // Fetch data for dropdowns
     useEffect(() => {
@@ -46,6 +57,26 @@ const CreateVenue = () => {
             //const { data: tags } = await supabase.from("tags").select("*").order("name", { ascending: true });
 
             setVenueCategories(venuecategories);
+
+            const { data: recommendedTags, error: recommendedTagsError } = 
+                await supabase.from("recommended_tags").select("*").eq("status", 'enabled');
+            if (recommendedTagsError) throw recommendedTagsError;
+            setRecommendedTags(
+                recommendedTags.map((tag) => ({
+                    value: tag.id,
+                    label: tag.tag_name,
+                }))
+            );
+
+            const { data: language, error: languageError } = 
+                await supabase.from("languages").select("*").eq("status", 'enabled');
+            if (languageError) throw languageError;
+            setLanguages(
+                language.map((lang) => ({
+                  value: lang.id,
+                  label: lang.language_name,
+                }))
+              );
         };
 
         fetchData();
@@ -71,7 +102,8 @@ const CreateVenue = () => {
               morning_hours: formData.morning_hours,
               price: formData.price,
               drink_min_spend: formData.drink_min_spend,
-              language: formData.language,
+              recommended: formData.recommended_tags_id,
+              language: formData.language_id,
               playability: formData.playability,
               minimum_tips: formData.minimum_tips,
               venue_category_id: formData.venue_category_id,
@@ -92,6 +124,7 @@ const CreateVenue = () => {
     
           navigate("/admin/venues"); // Navigate back to the venue list page
         } catch (error) {
+            
           console.error('Error saving venue:', error.message);
         }
       };
@@ -116,7 +149,8 @@ const CreateVenue = () => {
             if (error) throw error;
           }
         } catch (error) {
-          console.error("Error saving venue damage:", error.message);
+            showToast('Error saving venue damage', 'error');
+            console.error("Error saving venue damage:", error.message);
         }
       };
     
@@ -133,36 +167,13 @@ const CreateVenue = () => {
             }));
     
             const { error } = await supabase.from("venue_menu").insert(venueMenu);
-            console.log("what is the error?", error);
             if (error) throw error;
           }
         } catch (error) {
+            showToast('Error saving venue menu', 'error');
           console.error("Error saving venue menu:", error.message);
         }
       };
-
-    const handleStepChange = (index, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            steps: prev.steps.map((step, i) =>
-                i === index ? { ...step, description: value } : step
-            ),
-        }));
-    };
-
-    const addStep = () => {
-        setFormData((prev) => ({
-            ...prev,
-            steps: [...prev.steps, { description: "" }],
-        }));
-    };
-
-    const removeStep = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            steps: prev.steps.filter((_, i) => i !== index),
-        }));
-    };
 
     const handleTabChange = (index) => setActiveTab(index);
 
@@ -229,120 +240,180 @@ const CreateVenue = () => {
         }));
       };
 
-      const handleImageUpload = async (file, venueName) => {
-        try {
-            const fileName = `${venueName}_${new Date().toISOString().replace(/[:.]/g, "-")}`;
-
-          const { data, error } = await supabase.storage
-                .from('venue_main') // Name of your bucket
-                .upload(fileName, file, {
-                cacheControl: '3600', // Optional: Cache control
-                upsert: false, // Avoid overwriting
-                });
-      
-          if (error) throw error;
-      
-          const imagePath = `venue_main/${data.path}`;
-          return imagePath;
-        } catch (error) {
-          console.error("Error uploading image:", error.message);
-        }
-      };
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <h1>Create New Venue</h1>
+            <BackButton to="/admin/venues" />   
+            <h2>Create New Venue</h2> 
 
-            <div>
-                <label>Venue Name:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
-                    required
-                />
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
 
-                <label>Address:</label>
-                <textarea
-                    className="enhanced-input"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                />
+            <div className="outsider">
+                <div className="insider">
+                    <div className="field-container">
+                        <label>Venue Name:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.venue_name}
+                            onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                            required
+                        />
+                    </div>
 
-                <label>Category:</label>
-                <select
-                    id="venue_category"
-                    value={formData.venue_category_id}
-                    onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
-                    className="mt-1 block w-full bg-black text-white border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                >
-                    <option value="">Select a category</option>
-                    {venueCategories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                            {category.category_name}
-                        </option>
-                    ))}
-                </select>
+                    <div className="field-container">
+                        <label>Address:</label>
+                        <textarea
+                            className="enhanced-input"
+                            value={formData.address}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        />
+                    </div>
 
-                <label>Happy Hours:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.happy_hours}
-                    onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Category:</label>
+                        <select
+                            id="venue_category"
+                            value={formData.venue_category_id}
+                            onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
+                            className="mt-1 block w-full bg-black text-white border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            <option value="">Select a category</option>
+                            {venueCategories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.category_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <label>Night Hours:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.night_hours}
-                    onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Happy Hours:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.happy_hours}
+                            onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
+                        />
+                    </div>
 
-                <label>Morning Hours:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.morning_hours}
-                    onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Night Hours:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.night_hours}
+                            onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
+                        />
+                    </div>
 
-                <label>Opening Hours:</label>
-                <textarea
-                    className="enhanced-input"
-                    value={formData.opening_hours}
-                    onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Morning Hours:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.morning_hours}
+                            onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
+                        />
+                    </div>
 
-                <label>Price:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Opening Hours:</label>
+                        <textarea
+                            className="enhanced-input"
+                            value={formData.opening_hours}
+                            onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
+                        />
+                    </div>
 
-                <label>Drink Min Spend:</label>
-                <input
-                    className="enhanced-input"
-                    type="text"
-                    value={formData.drink_min_spend}
-                    onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
-                />
+                    <div className="field-container">
+                        <label>Price:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        />
+                    </div>
 
-                <label>Image: (only file with &lt; 1mb allowed)</label>
-                <input
-                    className="enhanced-input"
-                    type="file"
-                    onChange={(e) => setFormData({ ...formData, pic_path: e.target.files[0] })}
-                />
+                    <div className="field-container">
+                        <label>Drink Min Spend:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.drink_min_spend}
+                            onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Recommended Tags:</label>
+                        <Select
+                            options={recommendedTags} // Pass the fetched languages
+                            isMulti // Enable multi-select
+                            value={recommendedTags.filter((option) =>
+                                (formData.recommended_tags_id || []).includes(option.value)
+                            )} // Match selected values with formData
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                ...formData,
+                                recommended_tags_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
+                                })
+                            }
+                            placeholder="Choose at least one recommended tag"
+                            className="mt-1 block w-full text-black"
+                            classNamePrefix="react-select" // Optional styling customization
+                        />
+
+                    </div>
+
+                    <div className="field-container">
+                        <label>Languages:</label>
+                        <Select
+                            options={languages} // Pass the fetched languages
+                            isMulti // Enable multi-select
+                            value={languages.filter((option) =>
+                                (formData.language_id || []).includes(option.value)
+                            )} // Match selected values with formData
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                ...formData,
+                                language_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
+                                })
+                            }
+                            placeholder="Choose at least one language"
+                            className="mt-1 block w-full text-black"
+                            classNamePrefix="react-select" // Optional styling customization
+                        />
+
+                    </div>
+
+                    <div className="field-container">
+                        <label>Playability:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.playability}
+                            onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Image: (only file with &lt; 1mb allowed)</label>
+                        <input
+                            className="enhanced-input"
+                            type="file"
+                            onChange={(e) => setFormData({ ...formData, pic_path: e.target.files[0] })}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Tabs Navigation */}
             <div style={{ display: "flex", marginBottom: "20px" }}>
-                {["General Info", "Steps", "Media"].map((tab, index) => (
+                {["General Info", "Menu"].map((tab, index) => (
                 <div
                     key={index}
                     onClick={() => handleTabChange(index)}
@@ -541,54 +612,6 @@ const CreateVenue = () => {
                         </button>
                 </div>
             )}
-
-            {activeTab === 2 && (
-                <div style={{ marginTop: "20px" }}>
-                    <h2>Image Upload</h2>
-
-                    {/* Promotions Upload */}
-                    <div style={{ marginBottom: "20px" }}>
-                    </div>
-
-                    {/* Gallery Upload */}
-                    <div>
-                        <label>Gallery: (only files &lt;1MB allowed)</label>
-                        <input
-                            type="file"
-                            multiple
-                            onChange={(e) => handleFileUpload(e, "gallery")}
-                            style={{ margin: "10px 0" }}
-                        />
-                        {formData.gallery.length > 0 && (
-                            <div>
-                                <h4>Selected Gallery Files:</h4>
-                                <ul>
-                                    {formData.gallery.map((file, index) => (
-                                        <li key={index}>
-                                            {file.name} ({(file.size / 1024).toFixed(2)} KB)
-                                            <button
-                                                onClick={() => removeFile("gallery", index)}
-                                                style={{
-                                                    marginLeft: "10px",
-                                                    color: "white",
-                                                    backgroundColor: "#f44336",
-                                                    border: "none",
-                                                    borderRadius: "4px",
-                                                    padding: "5px",
-                                                    cursor: "pointer",
-                                                }}
-                                            >
-                                                Remove
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
 
             <button
                 onClick={handleSaveVenue}

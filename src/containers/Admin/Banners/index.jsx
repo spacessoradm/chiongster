@@ -6,16 +6,18 @@ import './index.css';
 import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
 import Pagination from '../../../components/pagination';
+import throttleByAnimationFrame from 'antd/es/_util/throttleByAnimationFrame';
 
-const VenueCategory = () => {
+const Banner = () => {
   const navigate = useNavigate();
 
-  const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [banners, setBanners] = useState([]);
+  const [imagePaths, setImagePaths] = useState([]);
+  const [filteredBanners, setFilteredBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "category_name", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "asc" });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
@@ -26,25 +28,40 @@ const VenueCategory = () => {
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
   };
 
-  const fetchCategories = async (pageNumber = 1) => {
+  const fetchBannersImage = async (pageNumber = 1) => {
     setLoading(true);
     setError(null);
     try {
       const start = (pageNumber - 1) * limit;
       const end = start + limit - 1;
 
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('venue_category')
-        .select('id, category_name, description, created_at')
+      const { data: bannersData, error: bannersError } = await supabase
+        .from('images_path')
+        .select('*')
+        .eq('type', 'Banner')
         .range(start, end);
 
-      if (categoriesError) throw categoriesError;
+      if (bannersError) throw bannersError;
 
-      setCategories(categoriesData);
-      setFilteredCategories(categoriesData);
-      setTotalPages(Math.ceil(categoriesData.length / limit));
+      // Extract and parse image paths from all rows
+      const imagePaths = bannersData
+      .map((row) =>
+        Array.isArray(row.image_path)
+          ? row.image_path
+          : row.image_path
+          ? JSON.parse(row.image_path || '[]')
+          : []
+      )
+      .flat(); // Flatten to combine all paths into a single array
+
+      setImagePaths(imagePaths);
+      console.log('Extracted image paths:', imagePaths);
+
+      setBanners(bannersData);
+      setFilteredBanners(bannersData);
+      setTotalPages(Math.ceil(bannersData.length / limit));
     } catch (error) {
-      showToast("Failed to fetch categories.", "error");
+      showToast("Failed to fetch banners image.", "error");
     } finally {
       setLoading(false);
     }
@@ -55,12 +72,12 @@ const VenueCategory = () => {
     setSearchTerm(term);
 
     if (term) {
-      const filtered = categories.filter((category) =>
-        category.category_name.toLowerCase().includes(term)
+      const filtered = banners.filter((banner) =>
+        banner.type.toLowerCase().includes(term)
       );
-      setFilteredCategories(filtered);
+      setFilteredBanners(filtered);
     } else {
-      setFilteredCategories(categories);
+      setFilteredBanners(banners);
     }
   };
 
@@ -71,46 +88,46 @@ const VenueCategory = () => {
     }
     setSortConfig({ key, direction });
 
-    fetchCategories(page);
+    fetchBannersImage(page);
   };
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
-      fetchCategories(newPage);
+      fetchBannersImage(newPage);
     }
   };
 
   useEffect(() => {
-    fetchCategories(page);
+    fetchBannersImage(page);
   }, [page]);
 
-  const handleRefresh = () => fetchCategories(page);
+  const handleRefresh = () => fetchBannersImage(page);
 
   const handleCreate = () => navigate("create");
 
-  const deleteCategory = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+  const deleteBanner = async (id, imagePath) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this banner?");
     if (!confirmDelete) return;
 
     try {
       setLoading(true);
 
       const { error } = await supabase
-        .from('venue_category')
+        .from('images_path')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
 
-      setCategories((prevCategories) => prevCategories.filter((category) => category.id !== id));
-      setFilteredCategories((prevFilteredCategories) =>
-        prevFilteredCategories.filter((category) => category.id !== id)
+      setBanners((prevBanners) => prevBanners.filter((banner) => banner.id !== id));
+      setFilteredBanners((prevFilteredBanners) =>
+        prevFilteredBanners.filter((banner) => banner.id !== id)
       );
 
-      showToast("Category deleted successfully.", "success");
+      showToast("Banner deleted successfully.", "success");
     } catch (err) {
-      showToast("Failed to delete category.", "error");
+      showToast("Failed to delete banner.", "error");
     } finally {
       setLoading(false);
     }
@@ -118,8 +135,8 @@ const VenueCategory = () => {
 
   return (
     <div className='whole-page'>
-      <p className='title-page'>Venue Category Module</p>
-      <p className='subtitle-page'>Manage your venue categories here.</p>
+      <p className='title-page'>Banner Module</p>
+      <p className='subtitle-page'>Manage your banner image here.</p>
 
       <SearchBar
         searchTerm={searchTerm}
@@ -128,25 +145,23 @@ const VenueCategory = () => {
         onCreate={handleCreate}
       />
 
-      {loading && <p>Loading categories...</p>}
+      {loading && <p>Loading banners...</p>}
 
       {toastInfo.visible && (
         <Toast message={toastInfo.message} type={toastInfo.type} />
       )}
 
-      {!loading && !error && filteredCategories.length > 0 ? (
+      {!loading && !error && filteredBanners.length > 0 ? (
         <>
           <table className='table-container'>
             <thead>
               <tr className='header-row'>
                 <th className='normal-header'>ID</th>
                 <th
-                  onClick={() => handleSort("category_name")}
-                  className='sort-header'
-                >
-                  Category Name {sortConfig.key === "category_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                  className='normal-header'
+                > Type
                 </th>
-                <th className='normal-header'> Description</th>
+                <th className='normal-header'> Image </th>
                 <th
                   onClick={() => handleSort("created_at")}
                   className='sort-header'
@@ -157,25 +172,24 @@ const VenueCategory = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCategories.map((category) => (
-                <tr key={category.id}>
-                  <td className='normal-column'>{category.id}</td>
-                  <td className='normal-column'>{category.category_name}</td>
-                  <td className='normal-column'>{category.description}</td>
-                  <td className='normal-column'>{category.created_at}</td>
+              {filteredBanners.map((banner) => (
+                <tr key={banner.id}>
+                  <td className='normal-column'>{banner.id}</td>
+                  <td className='normal-column'>{banner.type}</td>
+                  <td className='normal-column'>
+                  {imagePaths.map((path, index) => (
+                    <img
+                      key={index}
+                      src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/banner/${path}`}
+                      style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "8px" }}
+                      alt={`Banner ${index + 1}`}
+                    />
+                  ))}
+                  </td>
+                  <td className='normal-column'>{banner.created_at}</td>
                   <td className='action-column'>
-                    <FaEye
-                      onClick={() => navigate(`/admin/venuecategory/view/${category.id}`)}
-                      title='View'
-                      className='view-button'
-                    />
-                    <FaEdit 
-                      onClick={() => navigate(`/admin/venuecategory/edit/${category.id}`)}
-                      title='Edit'
-                      className='edit-button'
-                    />
                     <FaTrashAlt 
-                      onClick={() => deleteCategory(category.id)}
+                      onClick={() => deleteBanner(banner.id, imagePaths)}
                       title='Delete'
                       className='delete-button'
                     />
@@ -192,10 +206,10 @@ const VenueCategory = () => {
           />
         </>
       ) : (
-        !loading && <p>No categories found.</p>
+        !loading && <p>No banner found.</p>
       )}
     </div>
   );
 };
 
-export default VenueCategory;
+export default Banner;

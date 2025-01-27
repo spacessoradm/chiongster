@@ -148,13 +148,14 @@ const AppUsers = () => {
     }
   };
 
-  const handleRefresh = () => fetchItems(page);
+  const handleRefresh = () => fetchUsers(page);
 
   const handleCreate = () => navigate("create");
 
   return (
-    <div className='app-users'>
-      <h1>Manage Users</h1>
+    <div className='whole-page'>
+      <p className='title-page'>User Module</p>
+      <p className='subtitle-page'>Manage app users here.</p>
 
       <SearchBar
                 searchTerm={searchTerm}
@@ -166,45 +167,30 @@ const AppUsers = () => {
       {/* Show loading state */}
       {loading && <p>Loading users...</p>}
 
-      {/* Show error state */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {toastInfo.visible && (
+        <Toast message={toastInfo.message} type={toastInfo.type} />
+      )}
 
       {/* Display users */}
       {!loading && !error && filteredUsers.length > 0 ? (
         <>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <table className='table-container'>
             <thead>
-              <tr style={{ backgroundColor: "#f4f4f4" }}>
-              <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>ID</th>
+              <tr className='header-row'>
+              <th className='normal-header'>ID</th>
                 <th
                   onClick={() => handleSort("username")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   Username {sortConfig.key === "username" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => handleSort("role")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   Role {sortConfig.key === "role" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>Actions</th>
+                <th className='normal-header'>Actions</th>
               </tr>
             </thead>
             <tbody>

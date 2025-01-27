@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
-import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaEdit, FaFileImage, FaGripVertical, FaTrashAlt } from "react-icons/fa";
 
 import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
@@ -164,8 +164,9 @@ const Venues = () => {
     };
 
     return (
-        <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <h1 style={{ color: "#333" }}>Manage Venues</h1>
+        <div className='whole-page'>
+            <p className='title-page'>Venues Module</p>
+            <p className='subtitle-page'>Manage your venues here.</p>
 
             <SearchBar
                 searchTerm={searchTerm}
@@ -185,72 +186,41 @@ const Venues = () => {
             {/* Display venues */}
             {!loading && !error && filteredVenues.length > 0 ? (
                 <>
-                    <table
-                        style={{
-                            width: "100%",
-                            borderCollapse: "collapse",
-                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                        }}
-                    >
+                    <table className="table-container">
                         <thead>
-                            <tr style={{ backgroundColor: "#f4f4f4" }}>
+                            <tr className="header-row">
                                 <th
                                     onClick={() => handleSort("id")}
-                                    style={{
-                                        border: "1px solid #ccc",
-                                        padding: "10px",
-                                        textAlign: "left",
-                                        cursor: "pointer",
-                                    }}
+                                    className='sort-header'
                                 >
                                     ID {sortConfig.key === "id" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
                                     onClick={() => handleSort("venue_name")}
-                                    style={{
-                                        border: "1px solid #ccc",
-                                        padding: "10px",
-                                        textAlign: "left",
-                                        cursor: "pointer",
-                                    }}
+                                    className='sort-header'
                                 >
                                     Venue Name {sortConfig.key === "venue_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
                                     onClick={() => handleSort("address")}
-                                    style={{
-                                        border: "1px solid #ccc",
-                                        padding: "10px",
-                                        textAlign: "left",
-                                        cursor: "pointer",
-                                    }}
+                                    className='sort-header'
                                 >
                                     Address {sortConfig.key === "address" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
                                     onClick={() => handleSort("venue_category_name")}
-                                    style={{
-                                        border: "1px solid #ccc",
-                                        padding: "10px",
-                                        textAlign: "left",
-                                        cursor: "pointer",
-                                    }}
+                                    className='sort-header'
                                 >
                                     Category {sortConfig.key === "venue_category_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
                                 <th
                                     onClick={() => handleSort("created_at")}
-                                    style={{
-                                        border: "1px solid #ccc",
-                                        padding: "10px",
-                                        textAlign: "left",
-                                        cursor: "pointer",
-                                    }}
+                                    className='sort-header'
                                 >
                                     Created At {sortConfig.key === "created_at" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                                 </th>
-                                <th style={{ border: "1px solid #ccc", padding: "10px" }}>Image</th>
-                                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>Actions</th>
+                                <th className='normal-header'>Image</th>
+                                <th className='normal-header'>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -269,6 +239,17 @@ const Venues = () => {
                                         />
                                     </td>
                                     <td className='action-column'>
+                                        <FaFileImage 
+                                        onClick={() => navigate(`/admin/venues/create/${venue.id}`)}
+                                        title='Gallery'
+                                        className='create-button'
+                                        />
+
+                                        <FaGripVertical 
+                                        onClick={() => navigate(`/admin/venues/addpromotion/${venue.id}`)}
+                                        title='Promotion'
+                                        className='create-button'
+                                        />
                                         
                                         <FaTrashAlt 
                                         onClick={() => deleteVenue(venue.id)}

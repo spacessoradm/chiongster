@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
 import './CreateUser.css';
+import BackButton from '../../../components/Button/BackArrowButton';
+import Toast from '../../../components/Toast';
 
 const CreateUser = () => {
     const navigate = useNavigate();
@@ -80,12 +82,12 @@ const CreateUser = () => {
         <div className="create-user-container">
             <div className="create-user-header">
                 <h2>Create New User</h2>
-                <button className="back-btn" onClick={() => navigate('/admin/users')}>
-                    Back to Users
-                </button>
+                <BackButton to="/admin/users" />     
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
 
             <form onSubmit={handleSubmit} className="create-user-form">
                 <div className="form-group">

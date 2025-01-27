@@ -1,14 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from '../../../config/supabaseClient';
-import './ViewVenueCategory.css';   
+import './ViewLanguage.css';   
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
-const ViewVenueCategory = () => {
+const ViewLanguage = () => {
     const { id } = useParams();
     const navigate = useNavigate(); 
-    const [venueCategory, setVenueCategory] = useState(null);
+    const [language, setLanguage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDisabled, setIsDisabled] = useState(false);
@@ -20,60 +20,60 @@ const ViewVenueCategory = () => {
     };
 
     useEffect(() => {
-        const fetchVenueCategoryDetails = async () => { 
+        const fetchLanguageDetails = async () => { 
             setLoading(true);
             setError(null);
     
             try {
-                const { data: venueCategoryData, error: venueCategoryDataError } = await supabase
-                    .from("venue_category")
+                const { data: languageData, error: languageDataError } = await supabase
+                    .from("languages")
                     .select("*")
                     .eq("id", id)
                     .single();
-                if (venueCategoryDataError) throw venueCategoryDataError;
+                if (languageDataError) throw languageDataError;
     
-                setVenueCategory(venueCategoryData);
+                setLanguage(languageData);
     
             } catch (err) {
-                showToast("Failed to fetch category details.", "error");
+                showToast("Failed to fetch language details.", "error");
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
     
-        fetchVenueCategoryDetails();
+        fetchLanguageDetails();
     }, [id]);
 
-    const deleteVenueCategory = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+    const deleteLanguage = async (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this language?");
         if (!confirmDelete) return;
 
         try {
             setLoading(true);
 
-            const { error: venueCategoryError } = await supabase
-                .from("venue_category")
+            const { error: languageError } = await supabase
+                .from("languages")
                 .delete()
                 .eq("id", id);
 
-            if (venueCategoryError) throw venueCategoryError;
+            if (languageError) throw languageError;
 
-            navigate("/admin/venuecategory"); // Redirect after deletion
+            navigate("/admin/languages"); // Redirect after deletion
         } catch (err) {
-            showToast("Failed to delete category.", "error");
+            showToast("Failed to delete language.", "error");
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
     
-    if (loading) return <p>Loading category...</p>;
+    if (loading) return <p>Loading language...</p>;
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <BackButton to="/admin/venuecategory" />    
-            <h2>Venue Category Details</h2>
+            <BackButton to="/admin/languages" />    
+            <h2>Language Details</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -82,20 +82,20 @@ const ViewVenueCategory = () => {
             <form className="outsider">
                 <div className="insider">
                     <div className="field-container">
-                        <label>Venue Name:</label>
+                        <label>Language Name:</label>
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.category_name}
+                            value={language.language_name}
                             disabled={isDisabled}
                         />
                     </div>
                     <div className="field-container">
-                        <label>Venue Description:</label>
+                        <label>Status:</label>
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.description}
+                            value={language.status}
                             disabled={isDisabled}
                         />
                     </div>
@@ -104,7 +104,7 @@ const ViewVenueCategory = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={venueCategory.created_at}
+                            value={language.created_at}
                             disabled={isDisabled}
                         />
                     </div>
@@ -116,4 +116,4 @@ const ViewVenueCategory = () => {
     );
 };
 
-export default ViewVenueCategory;
+export default ViewLanguage;

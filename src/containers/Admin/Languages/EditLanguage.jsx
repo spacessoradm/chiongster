@@ -2,16 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
 
-import './EditVenueCategory.css';
+import './EditLanguage.css';
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
 
-const EditVenueCategory = () => {
+const EditLanguage = () => {
     const { id } = useParams();
-    const [venueCategory, setVenueCategory] = useState("");
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
+    const [language, setLanguage] = useState("");
+    const [status, setStatus] = useState("");
     const navigate = useNavigate();
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
@@ -21,58 +20,53 @@ const EditVenueCategory = () => {
     };
 
     useEffect(() => {
-        const fetchVenueCategoryData = async () => {
+        const fetchLanguageData = async () => {
             try {
                 // Fetch venue category data from the database
-                const { data: venueCategoryData, error: venueCategoryError } = await supabase
-                    .from("venue_category")
+                const { data: languageData, error: languageError } = await supabase
+                    .from("languages")
                     .select("*")
                     .eq("id", id)
                     .single();
 
-                if (venueCategoryError) throw venueCategoryError;
+                if (languageError) throw languageError;
 
-                setVenueCategory(venueCategoryData);
-                setName(venueCategoryData.category_name);
-                setDescription(venueCategoryData.description);
+                setLanguage(languageData.language_name);
+                setStatus(languageData.status);
             } catch (error) {
-                console.error("Error fetching venue category data:", error.message);
+                console.error("Error fetching language data:", error.message);
             }
         };
 
-        fetchVenueCategoryData();
+        fetchLanguageData();
     }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log("Name:", name);
-        console.log("Description:", description);
-
         try {
-            // Update venue category data in the database
             const { error: updateError } = await supabase
-                .from("venue_category")
+                .from("languages")
                 .update({
-                    category_name: name,
-                    description: description,
+                    language_name: language,
+                    status: status,
                 })
                 .eq("id", id);
 
             if (updateError) throw updateError;
 
-            showToast("Venue category updated successfully.", "success");
-            navigate("/admin/venuecategory");
+            showToast("Language updated successfully.", "success");
+            navigate("/admin/languages");
         } catch (error) {
-            console.error("Error updating venue category:", error.message);
-            showToast("Failed to update venue category.", "error");
+            console.error("Error updating language:", error.message);
+            showToast("Failed to update language.", "error");
         }
     };
  
     return (
         <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/venuecategory" /> 
-            <h2>Edit Venue Category</h2>
+            <BackButton to="/admin/languages" /> 
+            <h2>Edit Language</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -81,23 +75,26 @@ const EditVenueCategory = () => {
             <form onSubmit={handleSubmit} className="outsider">
                 <div className="insider">
                     <div className="field-container">
-                        <label>Category Name:</label>
+                        <label>Language Name:</label>
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
                             required
                         />
                     </div>
 
                     <div className="field-container">
-                        <label>Category Description:</label>
-                        <textarea
-                            className="custom-textarea"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        ></textarea>
+                        <label>Status:</label>
+                        <select
+                            className="custom-select"
+                            value={status}  
+                            onChange={(e) => setStatus(e.target.value)} 
+                        >
+                            <option value="enabled">Enabled</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
                     </div>
 
                     <button type="submit" className="submit-btn">Submit</button>
@@ -108,4 +105,4 @@ const EditVenueCategory = () => {
     );
 };
 
-export default EditVenueCategory;
+export default EditLanguage;

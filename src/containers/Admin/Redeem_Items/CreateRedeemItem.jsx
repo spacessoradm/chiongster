@@ -80,75 +80,75 @@ const CreateRedeemItem = () => {
 
     return (
         <div className="create-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <div className="create-venue-category-header">
-                <h2>Create New Redeem Item</h2>
-                <BackButton to="/admin/redeemitems" />     
-            </div>
+            <BackButton to="/admin/redeemitems" />   
+            <h2>Create New Redeem Item</h2> 
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
             )}
 
-            <form onSubmit={handleSubmit} className="create-venue-category-form" style={{ paddingTop: "20px" }}>
-                <div className="form-group">
-                    <label htmlFor="itemName">Item Name:</label>
-                    <input
-                        className='enhanced-input'
-                        type="text"
-                        id="itemName"
-                        name="itemName"
-                        value={formData.itemName}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+            <form onSubmit={handleSubmit} className="outsider">
+                <div className="insider">
+                    <div className="field-container">
+                        <label htmlFor="itemName">Item Name:</label>
+                        <input
+                            className='enhanced-input'
+                            type="text"
+                            id="itemName"
+                            name="itemName"
+                            value={formData.itemName}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div className="form-group">
-                    <label htmlFor="categoryDescription">Item Description:</label>
-                    <textarea
-                        id="itemDescription"
-                        name="itemDescription"
-                        value={formData.itemDescription}
-                        onChange={handleChange}
-                        required
-                        className="custom-textarea"
-                    ></textarea>
-                </div>
+                    <div className="field-container">
+                        <label htmlFor="categoryDescription">Item Description:</label>
+                        <textarea
+                            id="itemDescription"
+                            name="itemDescription"
+                            value={formData.itemDescription}
+                            onChange={handleChange}
+                            required
+                            className="custom-textarea"
+                        ></textarea>
+                    </div>
 
-                <div className="form-group">
-                    <label htmlFor="categoryName">Amount:</label>
-                    <input
-                        className='enhanced-input'
-                        type="text"
-                        id="itemAmount"
-                        name="itemAmount"
-                        value={formData.itemAmount}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+                    <div className="field-container">
+                        <label htmlFor="categoryName">Amount:</label>
+                        <input
+                            className='enhanced-input'
+                            type="text"
+                            id="itemAmount"
+                            name="itemAmount"
+                            value={formData.itemAmount}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
 
-                <div className="form-group">
-                    <label htmlFor="venueId">Venue:</label>
-                    <select
-                        id="venueId"
-                        name="venueId"
-                        value={formData.venueId}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Select a Venue</option>
-                        {venues.map((venue) => (
-                            <option key={venue.id} value={venue.id}>
-                                {venue.venue_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                    <div className="field-container">
+                        <label htmlFor="venueId">Venue:</label>
+                        <select
+                            id="venueId"
+                            name="venueId"
+                            value={formData.venueId}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select a Venue</option>
+                            {venues.map((venue) => (
+                                <option key={venue.id} value={venue.id}>
+                                    {venue.venue_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <button type="submit" className="create-btn" disabled={loading}>
-                    {loading ? 'Creating...' : 'Create'}
-                </button>
+                    <button type="submit" className="create-btn" disabled={loading}>
+                        {loading ? 'Creating...' : 'Create'}
+                    </button>
+                </div>
             </form>
         </div>
     );

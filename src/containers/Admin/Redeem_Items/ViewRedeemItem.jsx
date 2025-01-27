@@ -1,8 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from '../../../config/supabaseClient';
-
-
+import './ViewRedeemItem.css';
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
@@ -46,34 +45,28 @@ const ViewRedeemItem = () => {
     
             } catch (err) {
                 showToast("Failed to fetch category details.", "error");
-                console.error(err);
             } finally {
                 setLoading(false);
             }
-        };
-    
+        };   
         fetchRedeemItemDetails();
     }, [id]);
 
     
-    if (loading) return <p>Loading category...</p>;
+    if (loading) return <p>Loading redeem item...</p>;
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
             <BackButton to="/admin/redeemitems" />    
+            <h2>Redeem Item Details</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
             )}
 
-            {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "10px" }}>
-            </div>
-            <div className="edit-user-container">
-            <div className="admin-content">
-                <h2>Redeem Item Details</h2>
-                <form>
-                    <div className="form-group">
+            <div className="outsider">
+                <div className="insider">
+                    <div className="field-container">
                         <label>Item Name:</label>
                         <input
                             className='enhanced-input'
@@ -82,8 +75,7 @@ const ViewRedeemItem = () => {
                             disabled={isDisabled}
                         />
                     </div>
-
-                    <div className="form-group">
+                    <div className="field-container">
                         <label>Description:</label>
                         <input
                             className='enhanced-input'
@@ -92,8 +84,7 @@ const ViewRedeemItem = () => {
                             disabled={isDisabled}
                         />
                     </div>
-
-                    <div className="form-group">
+                    <div className="field-container">
                         <label>Amount:</label>
                         <input
                             className='enhanced-input'
@@ -102,20 +93,17 @@ const ViewRedeemItem = () => {
                             disabled={isDisabled}
                         />
                     </div>
-
-                    <div className="form-group">
+                    <div className="field-container">
                         <label>Venue:</label>
                         <input
                             className='enhanced-input'
                             type="text"
                             value={venueName}
-                            disabled={isDisabled}
+                            disabled={true}
                         />
                     </div>
-
-                </form>
+                </div>
             </div>
-        </div>
         </div>
         
     );
