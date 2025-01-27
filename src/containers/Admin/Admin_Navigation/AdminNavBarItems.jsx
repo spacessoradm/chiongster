@@ -43,6 +43,21 @@ const adminNavBarItems = [
         dropdown: true, // Indicates dropdown
         items: [
             {
+                title: "Manage Banner",
+                link: "/admin/banners",
+                icon: <FaListAlt />,
+            },
+            {
+                title: "Manage Language",
+                link: "/admin/languages",
+                icon: <FaListAlt />,
+            },
+            {
+                title: "Manage Recommended Tags",
+                link: "/admin/recommendedtags",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Redeem Items",
                 link: "/admin/redeemitems",
                 icon: <FaListAlt />,
