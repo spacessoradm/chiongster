@@ -75,6 +75,8 @@ import Venues from './containers/Admin/Venues/index.jsx';
 import CreateVenue from './containers/Admin/Venues/CreateVenue';
 /*import ViewVenue from './containers/Admin/Venues/ViewVenue';
 import EditVenue from './containers/Admin/Venues/EditVenue';*/
+import CreateVenueGallery from './containers/Admin/Venues/CreateGallery';
+import AddVenuePromotion from './containers/Admin/Venues/CreatePromotion';
 
 import Bookings from './containers/Admin/Bookings/index.jsx';
 import CreateBooking from './containers/Admin/Bookings/CreateBooking';
@@ -85,6 +87,19 @@ import RedeemItems from './containers/Admin/Redeem_Items/index.jsx';
 import CreateRedeemItem from './containers/Admin/Redeem_Items/CreateRedeemItem';
 import ViewRedeemItem from './containers/Admin/Redeem_Items/ViewRedeemItem';
 import EditRedeemItem from './containers/Admin/Redeem_Items/EditRedeemItem';
+
+import Banners from './containers/Admin/Banners/index.jsx';
+import CreateBanner from './containers/Admin/Banners/CreateBanner';
+
+import Languages from './containers/Admin/Languages/index.jsx';
+import CreateLanguage from './containers/Admin/Languages/CreateLanguage';
+import ViewLanguage from './containers/Admin/Languages/ViewLanguage';
+import EditLanguage from './containers/Admin/Languages/EditLanguage';
+
+import RecommendedTags from './containers/Admin/Recommended_Tags/index.jsx';
+import CreateRecommendedTag from './containers/Admin/Recommended_Tags/CreateRecommendedTag';
+import ViewRecommendedTag from './containers/Admin/Recommended_Tags/ViewRecommendedTag';
+import EditRecommendedTag from './containers/Admin/Recommended_Tags/EditRecommendedTag';
 
 const App = () => {
     const { userRole } = useAuth();
@@ -271,8 +286,25 @@ const App = () => {
                                     </AdminLayout>
                                 }
                             />
+                            <Route
+                                path="/admin/venues/create/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateVenueGallery />
+                                    </AdminLayout>
+                                }
+                            />
 
 <Route
+                                path="/admin/venues/addpromotion/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <AddVenuePromotion />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
                                 path="/admin/bookings"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
@@ -305,7 +337,7 @@ const App = () => {
                                 }
                             />
 
-<Route
+                            <Route
                                 path="/admin/redeemitems"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
@@ -337,6 +369,90 @@ const App = () => {
                                     </AdminLayout>
                                 }
                             />
+
+                            <Route
+                                path="/admin/banners"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Banners />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/banners/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateBanner />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/languages"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Languages />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/languages/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateLanguage />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/languages/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewLanguage/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/languages/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditLanguage/>
+                                    </AdminLayout>
+                                }
+                            />
+
+<Route
+                                path="/admin/recommendedtags"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <RecommendedTags />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/recommendedtags/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateRecommendedTag />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/recommendedtags/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewRecommendedTag/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/recommendedtags/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditRecommendedTag/>
+                                    </AdminLayout>
+                                }
+                            />
+
                         </>
                     )}
 
