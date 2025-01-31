@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
 
-import './EditRecommendedTag.css';
+import './EditBlogTag.css';
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
-
-const EditRecommendedTag = () => {
+const EditBlogTag = () => {
     const { id } = useParams();
-    const [recommendedTag, setRecommendedTag] = useState("");
+    const [blogTag, setBlogTag] = useState("");
     const [status, setStatus] = useState("");
     const navigate = useNavigate();
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
@@ -20,25 +19,25 @@ const EditRecommendedTag = () => {
     };
 
     useEffect(() => {
-        const fetchRecommendedTagData = async () => {
+        const fetchBlogTagData = async () => {
             try {
                 // Fetch venue category data from the database
-                const { data: recommendedTagData, error: recommendedTagError } = await supabase
-                    .from("recommended_tags")
+                const { data: blogTagData, error: blogTagError } = await supabase
+                    .from("blog_tags")
                     .select("*")
                     .eq("id", id)
                     .single();
 
-                if (recommendedTagError) throw recommendedTagError;
+                if (blogTagError) throw blogTagError;
 
-                setRecommendedTag(recommendedTagData.tag_name);
-                setStatus(recommendedTagData.status);
+                setBlogTag(blogTagData);
+                setStatus(blogTagData.status);
             } catch (error) {
-                console.error("Error fetching recommended tag data:", error.message);
+                showToast("Failed to fetch blog tag data.", "error");
             }
         };
 
-        fetchRecommendedTagData();
+        fetchBlogTagData();
     }, [id]);
 
     const handleSubmit = async (e) => {
@@ -46,27 +45,26 @@ const EditRecommendedTag = () => {
 
         try {
             const { error: updateError } = await supabase
-                .from("recommended_tags")
+                .from("blog_tags")
                 .update({
-                    tag_name: recommendedTag,
+                    tag_name: blogTag.tag_name,
                     status: status,
                 })
                 .eq("id", id);
 
             if (updateError) throw updateError;
 
-            showToast("Recommended tag updated successfully.", "success");
-            navigate("/admin/recommendedtags");
+            showToast("Blog tag updated successfully.", "success");
+            navigate("/admin/blogtags");
         } catch (error) {
-            console.error("Error updating recommended tag:", error.message);
-            showToast("Failed to update recommended tag.", "error");
+            showToast("Failed to update blog tag.", "error");
         }
     };
  
     return (
-        <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/recommendedtags" /> 
-            <h2>Edit Recommended Tag</h2>
+        <div style={{ fontFamily: "Courier New" }}>
+            <BackButton to="/admin/blogtags" /> 
+            <h2>Edit Blog Tag</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -79,8 +77,8 @@ const EditRecommendedTag = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={recommendedTag}
-                            onChange={(e) => setRecommendedTag(e.target.value)}
+                            value={blogTag.tag_name}
+                            onChange={(e) => setBlogTag({ ...blogTag, tag_name: e.target.value })}
                             required
                         />
                     </div>
@@ -105,4 +103,4 @@ const EditRecommendedTag = () => {
     );
 };
 
-export default EditRecommendedTag;
+export default EditBlogTag;

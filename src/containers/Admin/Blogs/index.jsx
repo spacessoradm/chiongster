@@ -7,15 +7,15 @@ import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
 import Pagination from '../../../components/pagination';
 
-const RedeemItems = () => {
+const Blogs = () => {
   const navigate = useNavigate();
 
-  const [items, setItems] = useState([]);
-  const [filteredItems, setFilteredItems] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "item_name", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({ key: "title", direction: "asc" });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
@@ -26,44 +26,43 @@ const RedeemItems = () => {
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
   };
 
-  const fetchItems = async (pageNumber = 1) => {
+  const fetchBlogs = async (pageNumber = 1) => {
     setLoading(true);
     setError(null);
     try {
       const start = (pageNumber - 1) * limit;
       const end = start + limit - 1;
 
-      const { data: itemsData, error: itemsDataError } = await supabase
-        .from('redeem_items')
-        .select('id, item_name, venue_id, created_at, pic_path')
+      const { data: blogsData, error: blogsDataError } = await supabase
+        .from('blogs')
+        .select('id, title, tags_id, created_at, image_path')
         .range(start, end);
 
-      if (itemsDataError) throw itemsDataError;
+      if (blogsDataError) throw blogsDataError;
 
-      const { data: venuesData, error: venuesDataError } = await supabase
-        .from('venues')
-        .select('id, venue_name');
+      const { data: tagsData, error: tagsDataError } = await supabase
+        .from('blog_tags')
+        .select('id, tag_name');
 
-      if (venuesDataError) throw venuesDataError;
+      if (tagsDataError) throw tagsDataError;
 
-      itemsData.forEach(item => {
-        const venue = venuesData.find(venue => venue.id === item.venue_id);
-        if (venue) {
-          item.venue_name = venue.venue_name;
+      blogsData.forEach(blog => {
+        const tag = tagsData.find(tag => tag.id === blog.tags_id);
+        if (tag) {
+          blog.tag_name = tag.tag_name;
         }
       });
 
-      setItems(itemsData);
-      setFilteredItems(itemsData);
+      setBlogs(blogsData);
+      setFilteredBlogs(blogsData);
 
       const { count } = await supabase
-        .from('redeem_items')
+        .from('blogs')
         .select('id', { count: 'exact', head: true });
 
       setTotalPages(Math.ceil(count / limit));
     } catch (error) {
-      setError("Failed to fetch items.");
-      console.error(error);
+      showToast("Failed to fetch blogs.", "error");
     } finally {
       setLoading(false);
     }
@@ -96,41 +95,40 @@ const RedeemItems = () => {
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
-      fetchCategories(newPage);
+      fetchBlogs(newPage);
     }
   };
 
   useEffect(() => {
-    fetchItems(page);
+    fetchBlogs(page);
   }, [page]);
 
   const handleRefresh = () => fetchItems(page);
 
   const handleCreate = () => navigate("create");
 
-  const deleteItem = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+  const deleteBlog = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this blog?");
     if (!confirmDelete) return;
 
     try {
       setLoading(true);
 
       const { error } = await supabase
-        .from('redeem_items')
+        .from('blogs')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
 
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-      setFilteredItems((prevFilteredItems) =>
-        prevFilteredItems.filter((item) => item.id !== id)
+      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
+      setFilteredBlogs((prevFilteredBlogs) =>
+        prevFilteredBlogs.filter((blog) => blog.id !== id)
       );
 
-      showToast("Item deleted successfully.", "success");
+      showToast("Blog deleted successfully.", "success");
     } catch (err) {
-      showToast("Failed to delete item.", "error");
-      console.error(err);
+      showToast("Failed to delete blog.", "error");
     } finally {
       setLoading(false);
     }
@@ -138,8 +136,8 @@ const RedeemItems = () => {
 
   return (
     <div className='whole-page'>
-      <p className='title-page'>Item Module</p>
-      <p className='subtitle-page'>Manage your items here.</p>
+      <p className='title-page'>Blog Module</p>
+      <p className='subtitle-page'>Manage app blogs here.</p>
 
       <SearchBar
         searchTerm={searchTerm}
@@ -149,14 +147,14 @@ const RedeemItems = () => {
       />
 
       {loading && (
-        <p className="loading-message">Loading items...</p>
+        <p className="loading-message">Loading blogs...</p>
       )}
 
       {toastInfo.visible && (
         <Toast message={toastInfo.message} type={toastInfo.type} />
       )}
 
-      {!loading && !error && filteredItems.length > 0 ? (
+      {!loading && !error && filteredBlogs.length > 0 ? (
         <>
           <table className='table-container'>
             <thead>
@@ -164,12 +162,12 @@ const RedeemItems = () => {
                 <th className='normal-header'> ID </th>
                 <th className='normal-header'> Image </th>
                 <th
-                  onClick={() => handleSort("item_name")}
+                  onClick={() => handleSort("title")}
                   className='sort-header'
                 >
-                  Item Name {sortConfig.key === "item_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                  Blog Title {sortConfig.key === "title" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th className='normal-header'> Venue Name </th>
+                <th className='normal-header'> Tags </th>
                 <th
                   onClick={() => handleSort("created_at")}
                   className='sort-header'
@@ -180,31 +178,22 @@ const RedeemItems = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id}>
-                  <td className='normal-column'>{item.id}</td>
+              {filteredBlogs.map((blog) => (
+                <tr key={blog.id}>
+                  <td className='normal-column'>{blog.id}</td>
                   <td className="normal-column">
                       <img
-                        src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${item.pic_path}`}
+                        src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${blog.image_path}`}
                         style={{ width: "50px", height: "50px", objectFit: "cover" }}
                       />
                   </td>
-                  <td className='normal-column'>{item.item_name}</td>
-                  <td className='normal-column'>{item.venue_name}</td>
-                  <td className='normal-column'>{item.created_at}</td>
+                  <td className='normal-column'>{blog.title}</td>
+                  <td className='normal-column'>{blog.tags}</td>
+                  <td className='normal-column'>{blog.created_at}</td>
                   <td className='action-column'>
-                    <FaEye
-                      onClick={() => navigate(`/admin/redeemitems/view/${item.id}`)}
-                      title='View'
-                      className='view-button'
-                    />
-                    <FaEdit 
-                      onClick={() => navigate(`/admin/redeemitems/edit/${item.id}`)}
-                      title='Edit'
-                      className='edit-button'
-                    />
+                    
                     <FaTrashAlt 
-                      onClick={() => deleteItem(item.id)}
+                      onClick={() => deleteBlog(blog.id)}
                       title='Delete'
                       className='delete-button'
                     />
@@ -221,10 +210,10 @@ const RedeemItems = () => {
           />
         </>
       ) : (
-        !loading && <p>No items found.</p>
+        !loading && <p>No blogs found.</p>
       )}
     </div>
   );
 };
 
-export default RedeemItems;
+export default Blogs;

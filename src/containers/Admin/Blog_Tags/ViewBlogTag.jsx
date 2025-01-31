@@ -1,14 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from '../../../config/supabaseClient';
-import './ViewRecommendedTag.css';   
+import './ViewBlogTag.css';   
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
-const ViewRecommendedTag = () => {
+const ViewBlogTag = () => {
     const { id } = useParams();
     const navigate = useNavigate(); 
-    const [recommendedTag, setRecommendedTag] = useState(null);
+    const [blogTag, setBlogTag] = useState(null);
     const [loading, setLoading] = useState(true);
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
@@ -18,37 +18,37 @@ const ViewRecommendedTag = () => {
     };
 
     useEffect(() => {
-        const fetchRecommendedTagDetails = async () => { 
+        const fetchBlogTagDetails = async () => { 
             setLoading(true);
     
             try {
-                const { data: recommendedTagData, error: recommendedTagDataError } = await supabase
-                    .from("recommended_tags")
+                const { data: blogTagData, error: blogTagDataError } = await supabase
+                    .from("blog_tags")
                     .select("*")
                     .eq("id", id)
                     .single();
-                if (recommendedTagDataError) throw recommendedTagDataError;
+
+                if (blogTagDataError) throw blogTagDataError;
     
-                setRecommendedTag(recommendedTagData);
+                setBlogTag(blogTagData);
     
             } catch (err) {
-                showToast("Failed to fetch recommended tag details.", "error");
-                console.error(err);
+                showToast("Failed to fetch blog tag details.", "error");
             } finally {
                 setLoading(false);
             }
         };
     
-        fetchRecommendedTagDetails();
+        fetchBlogTagDetails();
     }, [id]);
 
     
-    if (loading) return <p>Loading recommended tag...</p>;
+    if (loading) return <p>Loading blog tag...</p>;
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <BackButton to="/admin/recommendedtags" />    
-            <h2>Recommended Tag Details</h2>
+            <BackButton to="/admin/blogtags" />    
+            <h2>Blog Tag Details</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -61,7 +61,7 @@ const ViewRecommendedTag = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={recommendedTag.tag_name}
+                            value={blogTag.tag_name}
                             readOnly
                         />
                     </div>
@@ -70,7 +70,7 @@ const ViewRecommendedTag = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={recommendedTag.status}
+                            value={blogTag.status}
                             readOnly
                         />
                     </div>
@@ -79,7 +79,7 @@ const ViewRecommendedTag = () => {
                         <input
                             className="enhanced-input"
                             type="text"
-                            value={recommendedTag.created_at}
+                            value={blogTag.created_at}
                             readOnly
                         />
                     </div>
@@ -91,4 +91,4 @@ const ViewRecommendedTag = () => {
     );
 };
 
-export default ViewRecommendedTag;
+export default ViewBlogTag;

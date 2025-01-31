@@ -7,15 +7,15 @@ import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
 import Pagination from '../../../components/pagination';
 
-const VenueCategory = () => {
+const BlogTags = () => {
   const navigate = useNavigate();
 
-  const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [blogTags, setBlogTags] = useState([]);
+  const [filteredBlogTags, setFilteredBlogTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "category_name", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({ key: "tag_name", direction: "asc" });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
@@ -26,25 +26,25 @@ const VenueCategory = () => {
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
   };
 
-  const fetchCategories = async (pageNumber = 1) => {
+  const fetchBlogTags = async (pageNumber = 1) => {
     setLoading(true);
-    setError(null);
+
     try {
       const start = (pageNumber - 1) * limit;
       const end = start + limit - 1;
 
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('venue_category')
-        .select('id, category_name, description, created_at')
+      const { data: blogTagsData, error: blogTagsError } = await supabase
+        .from('blog_tags')
+        .select('*')
         .range(start, end);
 
-      if (categoriesError) throw categoriesError;
+      if (blogTagsError) throw blogTagsError;
 
-      setCategories(categoriesData);
-      setFilteredCategories(categoriesData);
-      setTotalPages(Math.ceil(categoriesData.length / limit));
+      setBlogTags(blogTagsData);
+      setFilteredBlogTags(blogTagsData);
+      setTotalPages(Math.ceil(blogTagsData.length / limit));
     } catch (error) {
-      showToast("Failed to fetch categories.", "error");
+      showToast("Failed to fetch blog tags.", "error");
     } finally {
       setLoading(false);
     }
@@ -55,12 +55,12 @@ const VenueCategory = () => {
     setSearchTerm(term);
 
     if (term) {
-      const filtered = categories.filter((category) =>
-        category.category_name.toLowerCase().includes(term)
+      const filtered = blogTags.filter((blogTag) =>
+        blogTag.tag_name.toLowerCase().includes(term)
       );
-      setFilteredCategories(filtered);
+      setFilteredBlogTags(filtered);
     } else {
-      setFilteredCategories(categories);
+      setFilteredBlogTags(blogTags);
     }
   };
 
@@ -71,46 +71,46 @@ const VenueCategory = () => {
     }
     setSortConfig({ key, direction });
 
-    fetchCategories(page);
+    fetchBlogTags(page);
   };
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
-      fetchCategories(newPage);
+      fetchBlogTags(newPage);
     }
   };
 
   useEffect(() => {
-    fetchCategories(page);
+    fetchBlogTags(page);
   }, [page]);
 
-  const handleRefresh = () => fetchCategories(page);
+  const handleRefresh = () => fetchBlogTags(page);
 
   const handleCreate = () => navigate("create");
 
-  const deleteCategory = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+  const deleteBlogTag = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this blog tag?");
     if (!confirmDelete) return;
 
     try {
       setLoading(true);
 
       const { error } = await supabase
-        .from('venue_category')
+        .from('blog_tags')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
 
-      setCategories((prevCategories) => prevCategories.filter((category) => category.id !== id));
-      setFilteredCategories((prevFilteredCategories) =>
-        prevFilteredCategories.filter((category) => category.id !== id)
+      setBlogTags((prevBlogTags) => prevBlogTags.filter((blogTag) => blogTag.id !== id));
+      setFilteredBlogTags((prevFilteredBlogTags) =>
+        prevFilteredBlogTags.filter((blogTag) => blogTag.id !== id)
       );
 
-      showToast("Category deleted successfully.", "success");
+      showToast("Blog tag deleted successfully.", "success");
     } catch (err) {
-      showToast("Failed to delete category.", "error");
+      showToast("Failed to delete blog tag.", "error");
     } finally {
       setLoading(false);
     }
@@ -118,8 +118,8 @@ const VenueCategory = () => {
 
   return (
     <div className='whole-page'>
-      <p className='title-page'>Venue Category Module</p>
-      <p className='subtitle-page'>Manage your venue categories here.</p>
+      <p className='title-page'>Blog Tags Module</p>
+      <p className='subtitle-page'>Manage your blog tags here.</p>
 
       <SearchBar
         searchTerm={searchTerm}
@@ -128,25 +128,25 @@ const VenueCategory = () => {
         onCreate={handleCreate}
       />
 
-      {loading && <p>Loading categories...</p>}
+      {loading && <p>Loading blog tags...</p>}
 
       {toastInfo.visible && (
         <Toast message={toastInfo.message} type={toastInfo.type} />
       )}
 
-      {!loading && !error && filteredCategories.length > 0 ? (
+      {!loading && !error && filteredBlogTags.length > 0 ? (
         <>
           <table className='table-container'>
             <thead>
               <tr className='header-row'>
                 <th className='normal-header'>ID</th>
                 <th
-                  onClick={() => handleSort("category_name")}
+                  onClick={() => handleSort("tag_name")}
                   className='sort-header'
                 >
-                  Category Name {sortConfig.key === "category_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                  Tag Name {sortConfig.key === "tag_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th className='normal-header'> Description</th>
+                <th className='normal-header'>Status</th>
                 <th
                   onClick={() => handleSort("created_at")}
                   className='sort-header'
@@ -157,25 +157,25 @@ const VenueCategory = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCategories.map((category) => (
-                <tr key={category.id}>
-                  <td className='normal-column'>{category.id}</td>
-                  <td className='normal-column'>{category.category_name}</td>
-                  <td className='normal-column'>{category.description}</td>
-                  <td className='normal-column'>{category.created_at}</td>
+              {filteredBlogTags.map((blogTag) => (
+                <tr key={blogTag.id}>
+                  <td className='normal-column'>{blogTag.id}</td>
+                  <td className='normal-column'>{blogTag.tag_name}</td>
+                  <td className='normal-column'>{blogTag.status}</td>
+                  <td className='normal-column'>{blogTag.created_at}</td>
                   <td className='action-column'>
                     <FaEye
-                      onClick={() => navigate(`/admin/venuecategory/view/${category.id}`)}
+                      onClick={() => navigate(`/admin/blogtags/view/${blogTag.id}`)}
                       title='View'
                       className='view-button'
                     />
                     <FaEdit 
-                      onClick={() => navigate(`/admin/venuecategory/edit/${category.id}`)}
+                      onClick={() => navigate(`/admin/blogtags/edit/${blogTag.id}`)}
                       title='Edit'
                       className='edit-button'
                     />
                     <FaTrashAlt 
-                      onClick={() => deleteCategory(category.id)}
+                      onClick={() => deleteBlogTag(blogTag.id)}
                       title='Delete'
                       className='delete-button'
                     />
@@ -192,10 +192,10 @@ const VenueCategory = () => {
           />
         </>
       ) : (
-        !loading && <p>No categories found.</p>
+        !loading && <p>No blog tags found.</p>
       )}
     </div>
   );
-}; 
+};
 
-export default VenueCategory;
+export default BlogTags;

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
 import './index.css';
+import SearchBar from '../../../components/SearchBarSection';
+import Toast from '../../../components/Toast';
+import Pagination from '../../../components/pagination';
 
 const DrinkDollars = () => {
   const navigate = useNavigate();
@@ -15,7 +19,13 @@ const DrinkDollars = () => {
   const [page, setPage] = useState(1); // Current page
   const [totalPages, setTotalPages] = useState(1); // Total pages
 
-  const limit = 10; 
+  const limit = 10;
+  const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+  const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+  };
 
   const fetchDrinkDollars = async (pageNumber = 1) => {
     setLoading(true);
@@ -26,7 +36,8 @@ const DrinkDollars = () => {
 
       const { data: users, error: usersError } = await supabase
         .from('profiles')
-        .select('id, username');
+        .select('id, username')
+        .range(start, end);
 
       // Fetch users from auth.users
       const { data: drinkDollarData, error: drinkDollarDataError } = await supabase
@@ -57,8 +68,7 @@ const DrinkDollars = () => {
       setFilteredDrinkDollars(usersWithDrinkDollars); // Initialize filtered data
       setTotalPages(Math.ceil(usersWithDrinkDollars.length / limit)); // Calculate total pages
     } catch (error) {
-      setError("Failed to fetch drink dollar records.");
-      console.error(error);
+      showToast("Failed to fetch drink dollar records.", "error");
     } finally {
       setLoading(false);
     }
@@ -104,73 +114,29 @@ const DrinkDollars = () => {
     fetchDrinkDollars(page);
   }, [page]);
 
-  const deleteRecord = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this record?");
-    if (!confirmDelete) return;
+  const handleRefresh = () => fetchDrinkDollars(page);
 
-    try {
-      setLoading(true);
+  const handleCreate = () => navigate("create");
 
-      const { error } = await supabase
-        .from('drink_dollars')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setDrinkDollars((prevDrinkDollars) => prevDrinkDollars.filter((drinkDollar) => drinkDollar.id !== id));
-      setFilteredDrinkDollars((prevFilteredDrinkDollars) =>
-        prevFilteredDrinkDollars.filter((drinkDollar) => drinkDollar.id !== id)
-      );
-
-      alert("Record deleted successfully.");
-    } catch (err) {
-      setError("Failed to delete record.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className='app-users'>
-      <h1>Manage Drink Dollars</h1>
+      <p className='title-page'>Drink Dollar Module</p>
+      <p className='subtitle-page'>Manage users drink dollar here.</p>
 
-      {/* Search and Refresh */}
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{
-            padding: "10px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            width: "100%",
-            maxWidth: "400px",
-          }}
-        />
-        <button
-          onClick={() => fetchDrinkDollars(page)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "4px",
-            border: "none",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Refresh
-        </button>
-      </div>
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
+        onRefresh={handleRefresh}
+        onCreate={handleCreate}
+      />
 
       {/* Show loading state */}
       {loading && <p>Loading records...</p>}
 
-      {/* Show error state */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {toastInfo.visible && (
+        <Toast message={toastInfo.message} type={toastInfo.type} />
+      )}
 
       {/* Display users */}
       {!loading && !error && filteredDrinkDollars.length > 0 ? (
@@ -184,42 +150,32 @@ const DrinkDollars = () => {
           >
             <thead>
               <tr style={{ backgroundColor: "#f4f4f4" }}>
-              <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>ID</th>
+              <th className='normal-header'>ID</th>
                 <th
                   onClick={() => handleSort("username")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   Username {sortConfig.key === "username" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>Coins</th>
+                <th className='normal-header'>Coins</th>
                 <th
                   onClick={() => handleSort("lastupdate")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   Last Update {sortConfig.key === "lastupdate" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>Actions</th>
+                <th className='normal-header'>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredDrinkDollars.map((drinkDollar) => (
                 <tr key={drinkDollar.id}>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{drinkDollar.id}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{drinkDollar.username}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>
+                  <td className='normal-column'>{drinkDollar.id}</td>
+                  <td className='normal-column'>{drinkDollar.username}</td>
+                  <td className='normal-column'>
                     {drinkDollar.coins}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>
+                  <td className='normal-column'>
                     {new Date(drinkDollar.lastupdate).toLocaleString("en-GB", {
                       day: "2-digit",
                       month: "2-digit",
@@ -229,75 +185,23 @@ const DrinkDollars = () => {
                       second: "2-digit",
                     })}
                   </td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>
-                  <button
-                    onClick={() => navigate(`/admin/drinkdollars/view/${drinkDollar.id}`)}
-                    style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#FFA500",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                    }}
-                  >
-                    View
-                  </button>
-                  <button
-                      onClick={() => navigate(`/admin/drinkdollars/edit/${drinkDollar.id}`)}
-                      style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#2196F3",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Edit
-                    </button>
+                  <td className='action-column'>
+                    <FaEye
+                      onClick={() => navigate(`/admin/drinkdollars/view/${drinkDollar.id}`)}
+                      title='View'
+                      className='view-button'
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Pagination Controls */}
-          <div style={{ marginTop: "20px", textAlign: "center" }}>
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              style={{
-                marginRight: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              Previous
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              style={{
-                marginLeft: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       ) : (
         !loading && <p>No records found.</p>

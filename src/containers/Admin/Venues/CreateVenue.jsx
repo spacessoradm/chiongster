@@ -6,6 +6,10 @@ import supabase from "../../../config/supabaseClient";
 import "./CreateVenue.css";
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
+import ImageUpload from '../../../components/Input/ImageUpload';
+import CreateNewEvent from '../../../components/Input/ImageUpload/CreateNewEvent';
+import CreateNewPromotion from '../../../components/Input/ImageUpload/CreateNewPromotion';
+import OptionRange from '../../../components/Input/OptionRange';
 
 const CreateVenue = () => {
     const navigate = useNavigate();
@@ -42,6 +46,8 @@ const CreateVenue = () => {
         menu: [{ item_name: "", item_description: "", original_price: "", discounted_price: "" }],
         gallery: [{ venue_id: "", type: "Gallery", image_path: "" }],
         pic_path: null,
+        event_pic_path: null,
+        promotion_pic_path: null,
     });
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
@@ -81,16 +87,9 @@ const CreateVenue = () => {
 
         fetchData();
     }, []);
-
+    
     const handleSaveVenue = async () => {
-        try {
-          const imageFile = formData.pic_path; // Assuming `formData.pic_path` contains the file
-          let imagePath = null;
-    
-          if (imageFile) {
-            imagePath = await handleImageUpload(imageFile, formData.venue_name); // Upload the image and get the path
-          }
-    
+        try {    
           const { data: venueData, error } = await supabase
             .from("venues")
             .insert({
@@ -107,7 +106,9 @@ const CreateVenue = () => {
               playability: formData.playability,
               minimum_tips: formData.minimum_tips,
               venue_category_id: formData.venue_category_id,
-              pic_path: imagePath, // Save the uploaded image path
+              pic_path: formData.pic_path,
+              event_pic_path: formData.event_pic_path,
+              promotion_pic_path: formData.promotion_pic_path, // Save the uploaded image path
               created_at: new Date().toISOString(),
               modified_at: new Date().toISOString(),  
             })
@@ -129,7 +130,7 @@ const CreateVenue = () => {
         }
       };
     
-      const handleSaveVenueDamage = async (venueId, damage) => {
+    const handleSaveVenueDamage = async (venueId, damage) => {
         try {
           if (damage.length > 0) {
             const venueDamages = damage.map((group) => ({
@@ -154,14 +155,14 @@ const CreateVenue = () => {
         }
       };
     
-      const handleSaveVenueMenu = async (venueId, menu) => {
+    const handleSaveVenueMenu = async (venueId, menu) => {
         try {
           if (menu.length > 0) {
             const venueMenu = menu.map((item) => ({
               venue_id: venueId,
               item_name: item.item_name,
               item_description: item.item_description,
-              original_price: item.original_price,
+              original_price: item.original_price ? Number(item.original_price) : null,
               created_at: new Date().toISOString(),
               modified_at: new Date().toISOString(),  
             }));
@@ -171,8 +172,24 @@ const CreateVenue = () => {
           }
         } catch (error) {
             showToast('Error saving venue menu', 'error');
-          console.error("Error saving venue menu:", error.message);
+            console.error("Error saving venue menu:", error.message);
         }
+      };
+
+    const handlePriceChange = (price) => {
+        setFormData({ ...formData, price });
+      };
+
+    const handleImageUpload = (url) => {
+        setFormData((prev) => ({ ...prev, pic_path: url }));
+      };
+
+    const handleEventImageUpload = (url) => {
+        setFormData((prev) => ({ ...prev, event_pic_path: url }));
+      };
+
+    const handlePromotionImageUpload = (url) => {
+        setFormData((prev) => ({ ...prev, promotion_pic_path: url }));
       };
 
     const handleTabChange = (index) => setActiveTab(index);
@@ -186,7 +203,7 @@ const CreateVenue = () => {
         });
       };
     
-      const addDamageGroup = () => {
+    const addDamageGroup = () => {
         setFormData((prev) => ({
           ...prev,
           damage: [
@@ -204,14 +221,14 @@ const CreateVenue = () => {
         }));
       };
     
-      const removeDamageGroup = (index) => {
+    const removeDamageGroup = (index) => {
         setFormData((prev) => ({
           ...prev,
           damage: prev.damage.filter((_, i) => i !== index),
         }));
       };
     
-      const handleMenuChange = (index, field, value) => {
+    const handleMenuChange = (index, field, value) => {
         setFormData((prev) => {
           const updatedMenu = [...prev.menu];
           updatedMenu[index][field] = value;
@@ -219,7 +236,7 @@ const CreateVenue = () => {
         });
       };
 
-      const addMenuGroup = () => {
+    const addMenuGroup = () => {
         setFormData((prev) => ({
           ...prev,
           menu: [
@@ -233,7 +250,7 @@ const CreateVenue = () => {
         }));
       };
     
-      const removeMenuGroup = (index) => {
+    const removeMenuGroup = (index) => {
         setFormData((prev) => ({
           ...prev,
           menu: prev.menu.filter((_, i) => i !== index),
@@ -278,7 +295,7 @@ const CreateVenue = () => {
                             id="venue_category"
                             value={formData.venue_category_id}
                             onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
-                            className="mt-1 block w-full bg-black text-white border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            className="enhanced-input"
                         >
                             <option value="">Select a category</option>
                             {venueCategories.map((category) => (
@@ -329,13 +346,13 @@ const CreateVenue = () => {
                     </div>
 
                     <div className="field-container">
-                        <label>Price:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        <OptionRange
+                            value={formData.price} // Current value
+                            max={5} // Max icons
+                            type="price" // Star icon
+                            onChange={handlePriceChange} // Callback
                         />
+                        <p>Selected Price Level: {formData.price}</p>
                     </div>
 
                     <div className="field-container">
@@ -400,14 +417,11 @@ const CreateVenue = () => {
                         />
                     </div>
 
-                    <div className="field-container">
-                        <label>Image: (only file with &lt; 1mb allowed)</label>
-                        <input
-                            className="enhanced-input"
-                            type="file"
-                            onChange={(e) => setFormData({ ...formData, pic_path: e.target.files[0] })}
-                        />
-                    </div>
+                    <ImageUpload onUpload={handleImageUpload} />
+
+                    <CreateNewPromotion onUpload={handlePromotionImageUpload} />
+
+                    <CreateNewEvent onUpload={handleEventImageUpload} />
                 </div>
             </div>
 

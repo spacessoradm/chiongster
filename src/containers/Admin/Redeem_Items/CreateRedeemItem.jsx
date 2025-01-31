@@ -5,6 +5,7 @@ import supabase from '../../../config/supabaseClient';
 import './CreateRedeemItem.css';
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
+import CreateRedeemImage from '../../../components/Input/ImageUpload/CreateRedeemImage';
 
 const CreateRedeemItem = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const CreateRedeemItem = () => {
         itemDescription: '',
         itemAmount: '',
         venueId: '',
+        pic_path: '',
     });
     const [venues, setVenues] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -61,6 +63,7 @@ const CreateRedeemItem = () => {
                         item_description: formData.itemDescription,
                         amount: formData.itemAmount,
                         venue_id: formData.venueId, 
+                        pic_path: formData.pic_path,
                         created_at: new Date().toISOString(),
                         modified_at: new Date().toISOString(),
                     },
@@ -77,6 +80,10 @@ const CreateRedeemItem = () => {
             setLoading(false);
         }
     };
+
+    const handleImageUpload = (url) => {
+        setFormData((prev) => ({ ...prev, pic_path: url }));
+      };
 
     return (
         <div className="create-venue-category-container" style={{ fontFamily: "Courier New" }}>
@@ -110,7 +117,7 @@ const CreateRedeemItem = () => {
                             value={formData.itemDescription}
                             onChange={handleChange}
                             required
-                            className="custom-textarea"
+                            className="enhanced-input"
                         ></textarea>
                     </div>
 
@@ -130,6 +137,7 @@ const CreateRedeemItem = () => {
                     <div className="field-container">
                         <label htmlFor="venueId">Venue:</label>
                         <select
+                            className='enhanced-input'
                             id="venueId"
                             name="venueId"
                             value={formData.venueId}
@@ -144,6 +152,8 @@ const CreateRedeemItem = () => {
                             ))}
                         </select>
                     </div>
+
+                    <CreateRedeemImage onUpload={handleImageUpload} />
 
                     <button type="submit" className="create-btn" disabled={loading}>
                         {loading ? 'Creating...' : 'Create'}

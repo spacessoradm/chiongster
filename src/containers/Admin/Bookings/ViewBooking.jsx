@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from "../../../config/supabaseClient";
-import BackButton from "../../../components/Button/BackButton";
+import BackButton from '../../../components/Button/BackArrowButton';
 
 const ViewBooking = () => {
   const { id } = useParams(); // user_id from URL
@@ -77,7 +77,7 @@ const ViewBooking = () => {
   return (
     <div style={{ padding: "20px", fontFamily: "Courier New" }}>
       {/* Back Button */}
-      <BackButton />
+      <BackButton to="/admin/bookings" /> 
 
       <div className="edit-user-container">
         <div className="admin-content">

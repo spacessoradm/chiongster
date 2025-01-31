@@ -1,80 +1,130 @@
-.app-users {
-  padding: 20px;
+/* Redeem Items */
+
+.whole-page{
   font-family: 'Courier New', Courier, monospace;
 }
 
-.admin-users-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.title-page{
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.create-user-btn {
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.sub-title{
+  font-size: 20px;
 }
 
-.create-user-btn:hover {
-  background-color: #45a049;
+/* index.jsx */
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-.users-table-container {
-  overflow-x: auto;
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
-.users-table {
+.loading-message {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  background: linear-gradient(90deg, #4CAF50, #2196F3, #FF5722);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fadeIn 2s ease-in-out infinite;
+}
+
+.error-message {
+  font-weight: bold;
+  text-align: center;
+}
+
+.table-container {
   width: 100%;
   border-collapse: collapse;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Courier New';
+  border-radius: 35px;
 }
 
-.users-table th,
-.users-table td {
-  padding: 10px;
-  text-align: left;
-  border: 1px solid #ddd;
-  white-space: nowrap; /* Prevents text wrapping */
-}
-
-.users-table th:nth-child(4),
-.users-table td:nth-child(4) {
-  width: 150px; /* Set a fixed width for the Actions column */
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: space-around; /* Distribute buttons evenly */
-  gap: 10px; /* Add spacing between buttons */
-}
-
-.edit-btn,
-.delete-btn {
-  padding: 5px 10px;
-  font-size: 14px;
+.header-row {
+  background-color: #dc7d7d;
   color: white;
-  border: none;
-  border-radius: 5px;
+}
+
+.sort-header {
+  padding: 10px; 
   cursor: pointer;
 }
 
-.edit-btn {
-  background-color: #2196F3; /* Blue for Edit */
+.normal-header {
+  padding: 10px; 
+  text-align: center;
 }
 
-.edit-btn:hover {
-  background-color: #0b7dda; /* Darker Blue on hover */
+.normal-column {
+  padding: 10px; 
+  text-align: center;
 }
 
-.delete-btn {
-  background-color: #f44336; /* Red for Delete */
+.action-column {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  gap: 20px;
 }
 
-.delete-btn:hover {
-  background-color: #da190b; /* Darker Red on hover */
+.view-button {
+  font-size: 25px;
+  color: #cfd730;
+  cursor: pointer;
 }
+
+.edit-button {
+  font-size: 25px;
+  color: #140ace;
+  cursor: pointer;
+}
+
+.delete-button {
+  font-size: 25px;
+  color: #d40815;
+  cursor: pointer;
+}
+
+.prev-button {
+  margin-right: 10px;
+  color: #2196F3;
+  font-size: 25px;
+}
+
+.next-button {
+  margin-left: 10px;
+  color: #2196F3;
+  font-size: 25px;
+}
+
 
 
