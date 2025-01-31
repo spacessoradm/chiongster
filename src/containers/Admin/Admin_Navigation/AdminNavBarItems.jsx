@@ -38,6 +38,11 @@ const adminNavBarItems = [
         icon: <FaUser />,
     },
     {
+        title: "Manage Blogs",
+        link: "/admin/blogs",
+        icon: <FaUser />,
+    },
+    {
         title: "Settings",
         icon: <FaCog />,
         dropdown: true, // Indicates dropdown
@@ -45,6 +50,11 @@ const adminNavBarItems = [
             {
                 title: "Manage Banner",
                 link: "/admin/banners",
+                icon: <FaListAlt />,
+            },
+            {
+                title: "Manage Blog Tags",
+                link: "/admin/blogtags",
                 icon: <FaListAlt />,
             },
             {
