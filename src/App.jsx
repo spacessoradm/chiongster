@@ -64,7 +64,7 @@ import ViewAppUser from './containers/Admin/App_Users/ViewAppUser';
 
 import DrinkDollars from './containers/Admin/Drink_Dollars/index.jsx';
 import ViewDrinkDollar from './containers/Admin/Drink_Dollars/ViewDrinkDollar';
-import EditDrinkDollar from './containers/Admin/Drink_Dollars/EditDrinkDollar';
+import CreateDDTransaction from './containers/Admin/Drink_Dollars/CreateDDTransaction';
 
 import VenueCategory from './containers/Admin/Venue_Category/index.jsx';
 import CreateVenueCategory from './containers/Admin/Venue_Category/CreateVenueCategory';
@@ -77,6 +77,11 @@ import CreateVenue from './containers/Admin/Venues/CreateVenue';
 import EditVenue from './containers/Admin/Venues/EditVenue';*/
 import CreateVenueGallery from './containers/Admin/Venues/CreateGallery';
 import AddVenuePromotion from './containers/Admin/Venues/CreatePromotion';
+
+import Blogs from './containers/Admin/Blogs/index.jsx';
+import CreateBlog from './containers/Admin/Blogs/CreateBlog';
+import ViewBlog from './containers/Admin/Blogs/ViewBlog';
+import EditBlog from './containers/Admin/Blogs/EditBlog';
 
 import Bookings from './containers/Admin/Bookings/index.jsx';
 import CreateBooking from './containers/Admin/Bookings/CreateBooking';
@@ -100,6 +105,11 @@ import RecommendedTags from './containers/Admin/Recommended_Tags/index.jsx';
 import CreateRecommendedTag from './containers/Admin/Recommended_Tags/CreateRecommendedTag';
 import ViewRecommendedTag from './containers/Admin/Recommended_Tags/ViewRecommendedTag';
 import EditRecommendedTag from './containers/Admin/Recommended_Tags/EditRecommendedTag';
+
+import BlogTags from './containers/Admin/Blog_Tags/index.jsx';
+import CreateBlogTag from './containers/Admin/Blog_Tags/CreateBlogTag';
+import ViewBlogTag from './containers/Admin/Blog_Tags/ViewBlogTag';
+import EditBlogTag from './containers/Admin/Blog_Tags/EditBlogTag';
 
 const App = () => {
     const { userRole } = useAuth();
@@ -221,22 +231,13 @@ const App = () => {
                                 }
                             />
                             <Route
-                                path="/admin/drinkdollars/edit/:id"
+                                path="/admin/drinkdollars/createtransaction/:id"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
-                                        <EditDrinkDollar />
+                                        <CreateDDTransaction />
                                     </AdminLayout>
                                 }
                             />
-                            <Route
-                                path="/admin/recipe-management/*"
-                                element={
-                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
-                                        <AdminRecipeNavigation />
-                                    </AdminLayout>
-                                }
-                            />
-
                             <Route
                                 path="/admin/venuecategory"
                                 element={
@@ -295,11 +296,44 @@ const App = () => {
                                 }
                             />
 
-<Route
+                            <Route
                                 path="/admin/venues/addpromotion/:id"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <AddVenuePromotion />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/blogs"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Blogs />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogs/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateBlog />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogs/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewBlog />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogs/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditBlog />
                                     </AdminLayout>
                                 }
                             />
@@ -449,6 +483,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditRecommendedTag/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/blogtags"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <BlogTags />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogtags/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateBlogTag />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogtags/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewBlogTag/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/blogtags/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditBlogTag/>
                                     </AdminLayout>
                                 }
                             />

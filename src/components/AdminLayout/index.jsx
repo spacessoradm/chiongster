@@ -20,7 +20,7 @@ const AdminLayout = ({ children, isCollapsed, toggleSidebar }) => {
 
         {/* Optional: Footer */}
         <footer className="admin-footer">
-          <p>Chiongster Admin Panel &copy; 2024-2025</p>
+          <p>Chiongster Admin Panel &copy; 2025</p>
         </footer>
       </div>
     </div>
