@@ -206,17 +206,16 @@ const EditManager = () => {
                         />
                     </div>
 
-                    <div className="field-container">
-                        <label>Status:</label>
-                        <select
-                            className="enhanced-input"
-                            value={formData.status}  
-                            onChange={(e) => setStatus(e.target.value)} 
-                        >
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
+                    <select
+                        className="enhanced-input"
+                        name="status"
+                        value={formData.status}  
+                        onChange={handleChange} 
+                    >
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+
 
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? 'Updating...' : 'Update'}
