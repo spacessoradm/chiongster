@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
             } else if (session) {
                 // Fetch user role from Supabase
                 const { data, error } = await supabase
-                    .from('profile') // Change 'profiles' to your actual user table
+                    .from('profiles') // Change 'profiles' to your actual user table
                     .select('role')
                     .eq('id', session.user.id)
                     .single();
