@@ -28,34 +28,8 @@ import AdminRecipeNavigation from './containers/Admin/Admin_Recipe/AdminRecipeNa
 import CreateUser from './containers/Admin/Admin_Users/CreateUser';
 import ViewUser from './containers/Admin/Admin_Users/ViewUser';
 import EditUser from './containers/Admin/Admin_Users/EditUser';
+*/
 
-import AdminInventories from './containers/Admin/Admin_Inventory/index.jsx';
-import CreateInventory from './containers/Admin/Admin_Inventory/CreateInventory';
-import ViewInventory from './containers/Admin/Admin_Inventory/ViewInventory';
-import EditInventory from './containers/Admin/Admin_Inventory/EditInventory';
-
-import AdminIngredients from './containers/Admin/Admin_Ingredients/index.jsx';
-import CreateIngredient from './containers/Admin/Admin_Ingredients/CreateIngredient';
-import ViewIngredient from './containers/Admin/Admin_Ingredients/ViewIngredient';
-import EditIngredient from './containers/Admin/Admin_Ingredients/EditIngredient';
-
-import AdminUnit from './containers/Admin/Admin_Units/index.jsx';
-import CreateUnit from './containers/Admin/Admin_Units/CreateUnit';
-import ViewUnit from './containers/Admin/Admin_Units/ViewUnit';
-import EditUnit from './containers/Admin/Admin_Units/EditUnit';
-
-import AdminUnitInv from './containers/Admin/Admin_UnitInv/index.jsx';
-import CreateUnitInv from './containers/Admin/Admin_UnitInv/CreateUnitInv';
-import ViewUnitInv from './containers/Admin/Admin_UnitInv/ViewUnitInv';
-import EditUnitInv from './containers/Admin/Admin_UnitInv/EditUnitInv';
-
-import AdminIngredientsCat from './containers/Admin/Admin_IngredientsCat/index.jsx';
-import CreateIngredientsCat from './containers/Admin/Admin_IngredientsCat/CreateIngredientsCat';
-import ViewIngredientsCat from './containers/Admin/Admin_IngredientsCat/ViewIngredientsCat';
-import EditIngredientsCat from './containers/Admin/Admin_IngredientsCat/EditIngredientsCat';
-
-import AdminExpiryDate from './containers/Admin/Admin_ExpiryDate/index.jsx';
-import CreateExpiryDate from './containers/Admin/Admin_ExpiryDate/CreateExpiryDate';*/
 
 //Chiongster
 import AppUsers from './containers/Admin/App_Users/index.jsx';
@@ -73,10 +47,12 @@ import EditVenueCategory from './containers/Admin/Venue_Category/EditVenueCatego
 
 import Venues from './containers/Admin/Venues/index.jsx';
 import CreateVenue from './containers/Admin/Venues/CreateVenue';
-/*import ViewVenue from './containers/Admin/Venues/ViewVenue';
-import EditVenue from './containers/Admin/Venues/EditVenue';*/
+//import ViewVenue from './containers/Admin/Venues/ViewVenue';
+import EditVenue from './containers/Admin/Venues/EditVenue';
 import CreateVenueGallery from './containers/Admin/Venues/CreateGallery';
 import AddVenuePromotion from './containers/Admin/Venues/CreatePromotion';
+import EditDamage from './containers/Admin/Venues/EditDamage';
+import EditMenu from './containers/Admin/Venues/EditMenu';
 
 import Blogs from './containers/Admin/Blogs/index.jsx';
 import CreateBlog from './containers/Admin/Blogs/CreateBlog';
@@ -87,6 +63,11 @@ import Bookings from './containers/Admin/Bookings/index.jsx';
 import CreateBooking from './containers/Admin/Bookings/CreateBooking';
 import ViewBooking from './containers/Admin/Bookings/ViewBooking';
 import EditBooking from './containers/Admin/Bookings/EditBooking';
+
+import Managers from './containers/Admin/Managers/index.jsx';
+import CreateManager from './containers/Admin/Managers/CreateManager';
+import ViewManager from './containers/Admin/Managers/ViewManager';
+import EditManager from './containers/Admin/Managers/EditManager';
 
 import RedeemItems from './containers/Admin/Redeem_Items/index.jsx';
 import CreateRedeemItem from './containers/Admin/Redeem_Items/CreateRedeemItem';
@@ -288,6 +269,15 @@ const App = () => {
                                 }
                             />
                             <Route
+                                path="/admin/venues/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditVenue />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
                                 path="/admin/venues/create/:id"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
@@ -301,6 +291,24 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <AddVenuePromotion />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/venues/editdamage/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditDamage />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/venues/editmenu/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditMenu />
                                     </AdminLayout>
                                 }
                             />
@@ -367,6 +375,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditBooking/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/managers"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Managers />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/managers/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateManager />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/managers/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewManager/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/managers/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditManager />
                                     </AdminLayout>
                                 }
                             />
