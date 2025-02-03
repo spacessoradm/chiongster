@@ -88,7 +88,7 @@ const EditLanguage = () => {
                     <div className="field-container">
                         <label>Status:</label>
                         <select
-                            className="custom-select"
+                            className="enhanced-input"
                             value={status}  
                             onChange={(e) => setStatus(e.target.value)} 
                         >

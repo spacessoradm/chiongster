@@ -73,12 +73,12 @@ const Blogs = () => {
     setSearchTerm(term);
 
     if (term) {
-      const filtered = items.filter((item) =>
-        item.item_name.toLowerCase().includes(term)
+      const filtered = blogs.filter((blog) =>
+        blog.title.toLowerCase().includes(term)
       );
-      setFilteredItems(filtered);
+      setFilteredBlogs(filtered);
     } else {
-      setFilteredItems(items);
+      setFilteredBlogs(blogs);
     }
   };
 
@@ -89,7 +89,7 @@ const Blogs = () => {
     }
     setSortConfig({ key, direction });
 
-    fetchCategories(page);
+    fetchBlogs(page);
   };
 
   const handlePageChange = (newPage) => {
@@ -103,7 +103,7 @@ const Blogs = () => {
     fetchBlogs(page);
   }, [page]);
 
-  const handleRefresh = () => fetchItems(page);
+  const handleRefresh = () => fetchBlogs(page);
 
   const handleCreate = () => navigate("create");
 
@@ -191,7 +191,16 @@ const Blogs = () => {
                   <td className='normal-column'>{blog.tags}</td>
                   <td className='normal-column'>{blog.created_at}</td>
                   <td className='action-column'>
-                    
+                    <FaEye
+                      onClick={() => navigate(`/admin/blogs/view/${blog.id}`)}
+                      title='View'
+                      className='view-button'
+                    />
+                    <FaEdit 
+                      onClick={() => navigate(`/admin/blogs/edit/${blog.id}`)}
+                      title='Edit'
+                      className='edit-button'
+                    />
                     <FaTrashAlt 
                       onClick={() => deleteBlog(blog.id)}
                       title='Delete'

@@ -22,6 +22,13 @@ const adminNavBarItems = [
         link: "/admin/appusers",
         icon: <FaUser />,
     },
+
+    {
+        title: "Manage Managers",
+        link: "/admin/managers",
+        icon: <FaUser />,
+    },
+
     {
         title: "Manage Bookings",
         link: "/admin/bookings",

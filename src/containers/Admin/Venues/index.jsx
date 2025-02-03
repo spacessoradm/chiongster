@@ -250,6 +250,12 @@ const Venues = () => {
                                         title='Promotion'
                                         className='create-button'
                                         />
+
+                                        <FaEdit 
+                                        onClick={() => navigate(`/admin/venues/edit/${venue.id}`)}
+                                        title='Edit'
+                                        className='edit-button'
+                                        />
                                         
                                         <FaTrashAlt 
                                         onClick={() => deleteVenue(venue.id)}

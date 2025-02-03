@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Select from "react-select";
 import supabase from '../../../config/supabaseClient';
-import './EditRedeemItem.css';
+import './EditBlog.css';
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
 
-const EditRedeemItem = () => {
+const EditBlog = () => {
     const navigate = useNavigate();
     const { id } = useParams(); // Get the redeem item ID from the route parameters
 
     const [formData, setFormData] = useState({
-        itemName: '',
-        itemDescription: '',
-        itemAmount: '',
-        venueId: '',
-        pic_path: null
+        title: '',
+        content: '',
+        tags_id: '',
+        status: '',
+        image_path: '',
     });
-    const [venues, setVenues] = useState([]);
+    const [tags, setTags] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
     const showToast = (message, type) => {
@@ -27,47 +27,53 @@ const EditRedeemItem = () => {
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
     };
 
-    // Fetch venues when the component loads
+    // Fetch blog when the component loads
     useEffect(() => {
-        const fetchVenues = async () => {
+        const fetchBlogTags = async () => {
             try {
                 const { data, error: fetchError } = await supabase
-                    .from('venues')
-                    .select('id, venue_name');
+                    .from('blog_tags')
+                    .select('id, tag_name');
                 if (fetchError) throw fetchError;
-                setVenues(data);
+                // Convert Supabase data into a format compatible with react-select
+                const formattedTags = data.map(tag => ({
+                    value: tag.id, 
+                    label: tag.tag_name 
+                }));
+
+                setTags(formattedTags);
             } catch (err) {
-                console.error('Error fetching venues:', err);
+                console.error('Error fetching tags:', err);
             }
         };
 
-        fetchVenues();
+        fetchBlogTags();
     }, []);
 
     // Fetch redeem item details when the component loads
     useEffect(() => {
-        const fetchRedeemItem = async () => {
+        const fetchBlog = async () => {
             try {
                 const { data, error: fetchError } = await supabase
-                    .from('redeem_items')
+                    .from('blogs')
                     .select('*')
                     .eq('id', id)
                     .single();
                 if (fetchError) throw fetchError;
 
                 setFormData({
-                    itemName: data.item_name,
-                    itemDescription: data.item_description,
-                    itemAmount: data.amount,
-                    venueId: data.venue_id,
-                    pic_path: data.pic_path || null
+                    title: data.title,
+                    content: data.content,
+                    tags_id: data.tags_id,
+                    status: data.status,
+                    image_path: data.image_path
                 });
             } catch (err) {
-                showToast(`Error fetching redeem item: ${err.message}`, 'error')
+                showToast(`Error fetching blog: ${err.message}`, 'error')
             }
         };
 
-        fetchRedeemItem();
+        fetchBlog();
     }, [id]);
 
     const handleChange = (e) => {
@@ -82,54 +88,54 @@ const EditRedeemItem = () => {
         setLoading(true);
 
         try {
-            let newImageUrl = formData.pic_path;
+            let newImageUrl = formData.image_path;
 
             // Upload new image if a new file is selected
             if (selectedImage) {
                 const fileExt = selectedImage.name.split('.').pop();
                 const fileName = `${id}_${Date.now()}.${fileExt}`;
-                newImageUrl = `redemption/${fileName}`;
+                newImageUrl = `blog_image/${fileName}`;
     
                 // Delete old image if it exists
-                if (formData.pic_path) {
-                    const oldFileName = formData.pic_path.split('/').pop();
-                    await supabase.storage.from('redemption').remove([`${oldFileName}`]);
+                if (formData.image_path) {
+                    const oldFileName = formData.image_path.split('/').pop();
+                    await supabase.storage.from('blog_image').remove([`${oldFileName}`]);
                 }
     
                 // Upload the new image
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('redemption')
+                    .from('blog_image')
                     .upload(fileName, selectedImage);
     
                 if (uploadError) throw uploadError;
             }
 
             const { error: updateError } = await supabase
-                .from('redeem_items')
+                .from('blogs')
                 .update({
-                    item_name: formData.itemName,
-                    item_description: formData.itemDescription,
-                    amount: formData.itemAmount,
-                    venue_id: formData.venueId,
-                    pic_path: newImageUrl,
+                    title: formData.title,
+                    content: formData.content,
+                    tags_id: formData.tags_id,
+                    status: formData.status,
+                    image_path: newImageUrl,
                     modified_at: new Date().toISOString(),
                 })
                 .eq('id', id);
 
             if (updateError) throw updateError;
 
-            navigate('/admin/redeemitems');
+            navigate('/admin/blogs');
         } catch (error) {
-            showToast(`Error updating redeem item: ${error.message}`, 'error');
+            showToast(`Error updating blog: ${error.message}`, 'error');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/redeemitems" /> 
-            <h2>Edit Redeem Item</h2>
+        <div style={{ fontFamily: "Courier New" }}>
+            <BackButton to="/admin/blogs" /> 
+            <h2>Edit Blog</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -138,24 +144,24 @@ const EditRedeemItem = () => {
             <form onSubmit={handleSubmit} className="outsider">
                 <div className="insider">
                     <div className="field-container">
-                        <label htmlFor="itemName">Item Name:</label>
+                        <label>Title:</label>
                         <input
                             className='enhanced-input'
                             type="text"
-                            id="itemName"
-                            name="itemName"
-                            value={formData.itemName}
+                            id="title"
+                            name="title"
+                            value={formData.title}
                             onChange={handleChange}
                             required
                         />
                     </div>
 
                 <div className="field-container">
-                    <label htmlFor="itemDescription">Item Description:</label>
+                    <label>Content:</label>
                     <textarea
-                        id="itemDescription"
-                        name="itemDescription"
-                        value={formData.itemDescription}
+                        id="content"
+                        name="content"
+                        value={formData.content}
                         onChange={handleChange}
                         required
                         className="enhanced-input"
@@ -163,39 +169,24 @@ const EditRedeemItem = () => {
                 </div>
 
                 <div className="field-container">
-                    <label htmlFor="itemAmount">Amount:</label>
-                    <input
-                        className='enhanced-input'
-                        type="text"
-                        id="itemAmount"
-                        name="itemAmount"
-                        value={formData.itemAmount}
-                        onChange={handleChange}
-                        required
-                    />
+                        <label>Tag:</label>
+                        <Select
+                            options={tags}
+                            isMulti // Enable multi-select
+                            value={tags.filter(option => formData.tags_id?.includes(option.value))}// Match selected values with formData
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                ...formData,
+                                tags_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
+                                })
+                            }
+                            placeholder="Choose at least one recommended tag"
+                            className="enhanced-input" // Optional styling customization
+                        />
                 </div>
 
                 <div className="field-container">
-                    <label htmlFor="venueId">Venue:</label>
-                    <select
-                        className='enhanced-input'
-                        id="venueId"
-                        name="venueId"
-                        value={formData.venueId}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Select a Venue</option>
-                        {venues.map((venue) => (
-                            <option key={venue.id} value={venue.id}>
-                                {venue.venue_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="field-container">
-                    <label htmlFor="itemImage">Item Image:</label>
+                    <label htmlFor="itemImage">Blog Image:</label>
                     <input 
                         type="file" 
                         id="itemImage" 
@@ -206,15 +197,15 @@ const EditRedeemItem = () => {
                     />
                 </div>
 
-                {formData.pic_path && (
+                {formData.image_path && (
                     <div className="field-container">
                         <label>Current Image:</label>
-                        <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${formData.pic_path}`} alt="Current Item" className="preview-image" />
+                        <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${formData.image_path}`} alt="Current Item" className="preview-image" />
                     </div>
                 )}
 
                 <button type="submit" className="submit-btn" disabled={loading}>
-                    {loading ? 'Updating...' : 'Update Redeem Item'}
+                    {loading ? 'Updating...' : 'Update'}
                 </button>
 
                 </div>
@@ -223,4 +214,4 @@ const EditRedeemItem = () => {
     );
 };
 
-export default EditRedeemItem;
+export default EditBlog;
