@@ -53,6 +53,7 @@ import CreateVenueGallery from './containers/Admin/Venues/CreateGallery';
 import AddVenuePromotion from './containers/Admin/Venues/CreatePromotion';
 import EditDamage from './containers/Admin/Venues/EditDamage';
 import EditMenu from './containers/Admin/Venues/EditMenu';
+import EditVenueRedeemItem from './containers/Admin/Venues/EditRedeemItem';
 
 import Blogs from './containers/Admin/Blogs/index.jsx';
 import CreateBlog from './containers/Admin/Blogs/CreateBlog';
@@ -91,6 +92,11 @@ import BlogTags from './containers/Admin/Blog_Tags/index.jsx';
 import CreateBlogTag from './containers/Admin/Blog_Tags/CreateBlogTag';
 import ViewBlogTag from './containers/Admin/Blog_Tags/ViewBlogTag';
 import EditBlogTag from './containers/Admin/Blog_Tags/EditBlogTag';
+
+import Notis from './containers/Admin/Notis/index.jsx';
+import CreateNotis from './containers/Admin/Notis/CreateNotis';
+import ViewNotis from './containers/Admin/Notis/ViewNotis';
+import EditNotis from './containers/Admin/Notis/EditNotis';
 
 const App = () => {
     const { userRole } = useAuth();
@@ -309,6 +315,15 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditMenu />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/venues/editredeemitem/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditVenueRedeemItem />
                                     </AdminLayout>
                                 }
                             />
@@ -557,6 +572,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditBlogTag/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/notis"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Notis />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/notis/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateNotis />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/notis/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditNotis/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/notis/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewNotis/>
                                     </AdminLayout>
                                 }
                             />
