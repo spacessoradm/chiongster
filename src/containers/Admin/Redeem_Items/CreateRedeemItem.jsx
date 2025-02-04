@@ -61,7 +61,7 @@ const CreateRedeemItem = () => {
                     {
                         item_name: formData.itemName,
                         item_description: formData.itemDescription,
-                        amount: null,
+                        amount: 0,
                         venue_id: null, 
                         pic_path: formData.pic_path,
                         created_at: new Date().toISOString(),
