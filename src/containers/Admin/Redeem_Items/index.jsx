@@ -169,7 +169,6 @@ const RedeemItems = () => {
                 >
                   Item Name {sortConfig.key === "item_name" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th className='normal-header'> Venue Name </th>
                 <th
                   onClick={() => handleSort("created_at")}
                   className='sort-header'
@@ -190,7 +189,6 @@ const RedeemItems = () => {
                       />
                   </td>
                   <td className='normal-column'>{item.item_name}</td>
-                  <td className='normal-column'>{item.venue_name}</td>
                   <td className='normal-column'>{item.created_at}</td>
                   <td className='action-column'>
                     <FaEye

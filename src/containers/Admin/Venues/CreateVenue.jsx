@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Select from "react-select";
 import supabase from "../../../config/supabaseClient";
+import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
 
 import "./CreateVenue.css";
 import BackButton from '../../../components/Button/BackArrowButton';
@@ -10,12 +10,19 @@ import ImageUpload from '../../../components/Input/ImageUpload';
 import CreateNewEvent from '../../../components/Input/ImageUpload/CreateNewEvent';
 import CreateNewPromotion from '../../../components/Input/ImageUpload/CreateNewPromotion';
 import OptionRange from '../../../components/Input/OptionRange';
+import PlainInput from '../../../components/Input/PlainInput';
+import TextArea from '../../../components/Input/TextArea';
+import SingleSelect from '../../../components/Input/SingleSelect';
+import MultiSelect from '../../../components/Input/MultiSelect';
 
 const CreateVenue = () => {
     const navigate = useNavigate();
+    const [venues, setVenues] = useState([]);
     const [venueCategories, setVenueCategories] = useState([]);
     const [recommendedTags, setRecommendedTags] = useState([]);
     const [languages, setLanguages] = useState([]);
+    const [managers, setManagers] = useState([]);
+    const [items, setItems] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
     const [formData, setFormData] = useState({
         venue_name: "",
@@ -24,11 +31,12 @@ const CreateVenue = () => {
         happy_hours: "",
         night_hours: "",
         morning_hours: "",
-        recommended: "",
-        price: "",
+        price: 0,
         drink_min_spend: "",
         recommended_tags_id: "",
         language_id: "",
+        manager_id: "",
+        similar_place_id: "",
         playability: "",
         minimum_tips: "",
         venue_category_id: "",
@@ -44,12 +52,16 @@ const CreateVenue = () => {
             },
         ],
         menu: [{ item_name: "", item_description: "", original_price: "", discounted_price: "" }],
-        gallery: [{ venue_id: "", type: "Gallery", image_path: "" }],
+        item: [{ item_id: "", venue_id: "", amount: "" }],
         pic_path: null,
         event_pic_path: null,
         promotion_pic_path: null,
     });
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
 
     const showToast = (message, type) => {
         setToastInfo({ visible: true, message, type });
@@ -59,37 +71,38 @@ const CreateVenue = () => {
     // Fetch data for dropdowns
     useEffect(() => {
         const fetchData = async () => {
-            const { data: venuecategories } = await supabase.from("venue_category").select("*");
-            //const { data: tags } = await supabase.from("tags").select("*").order("name", { ascending: true });
+            try {
+                const [venueRes, venueCatRes, tagRes, langRes, managerRes, itemRes] = await Promise.all([
+                    supabase.from("venues").select("id, venue_name"),
+                    supabase.from("venue_category").select("*"),
+                    supabase.from("recommended_tags").select("*").eq("status", 'enabled'),
+                    supabase.from("languages").select("*").eq("status", 'enabled'),
+                    supabase.from("manager_profiles").select("*").eq("status", 'approved'),
+                    supabase.from("redeem_items").select("*")
+                ]);
+    
+                if (venueRes.error || venueCatRes.error || tagRes.error || langRes.error || managerRes.error || itemRes.error) {
+                    throw new Error("Error fetching initial data");
+                }
+    
+                setVenues(venueRes.data.map(v => ({ value: v.id, label: v.venue_name })));
+                setVenueCategories(venueCatRes.data.map(vec => ({ value: vec.id, label: vec.category_name })));
+                setRecommendedTags(tagRes.data.map(tag => ({ value: tag.id, label: tag.tag_name })));
+                setLanguages(langRes.data.map(lang => ({ value: lang.id, label: lang.language_name })));
+                setManagers(managerRes.data.map(mang => ({ value: mang.id, label: mang.username })));
+                setItems(itemRes.data.map(item => ({ value: item.id, label: item.item_name })));
 
-            setVenueCategories(venuecategories);
-
-            const { data: recommendedTags, error: recommendedTagsError } = 
-                await supabase.from("recommended_tags").select("*").eq("status", 'enabled');
-            if (recommendedTagsError) throw recommendedTagsError;
-            setRecommendedTags(
-                recommendedTags.map((tag) => ({
-                    value: tag.id,
-                    label: tag.tag_name,
-                }))
-            );
-
-            const { data: language, error: languageError } = 
-                await supabase.from("languages").select("*").eq("status", 'enabled');
-            if (languageError) throw languageError;
-            setLanguages(
-                language.map((lang) => ({
-                  value: lang.id,
-                  label: lang.language_name,
-                }))
-              );
+            } catch (error) {
+                showToast("Error populate the dropdowns values", "error");
+            }
         };
 
         fetchData();
     }, []);
     
     const handleSaveVenue = async () => {
-        try {    
+        try {
+            console.log(formData);
           const { data: venueData, error } = await supabase
             .from("venues")
             .insert({
@@ -101,14 +114,16 @@ const CreateVenue = () => {
               morning_hours: formData.morning_hours,
               price: formData.price,
               drink_min_spend: formData.drink_min_spend,
-              recommended: formData.recommended_tags_id,
-              language: formData.language_id,
+              recommended: formData.recommended_tags_id || null,
+              language: formData.language_id || null,
+              manager_id: formData.manager_id || null,
+              similar_place_id: formData.similar_place_id || null,
               playability: formData.playability,
               minimum_tips: formData.minimum_tips,
-              venue_category_id: formData.venue_category_id,
+              venue_category_id: selectedCategory || null,
               pic_path: formData.pic_path,
               event_pic_path: formData.event_pic_path,
-              promotion_pic_path: formData.promotion_pic_path, // Save the uploaded image path
+              promotion_pic_path: formData.promotion_pic_path,
               created_at: new Date().toISOString(),
               modified_at: new Date().toISOString(),  
             })
@@ -119,19 +134,22 @@ const CreateVenue = () => {
     
           const venueID = venueData.id;
     
-          // Save related data (damage, menu, etc.)
-          await handleSaveVenueDamage(venueID, formData.damage);
-          await handleSaveVenueMenu(venueID, formData.menu);
+          await Promise.all([
+            handleSaveVenueDamage(venueID, formData.damage),
+            handleSaveVenueMenu(venueID, formData.menu),
+            handleSaveVenueRedeemItem(venueID, formData.item)
+          ]);
     
+          showToast("Venue created successfully", "success");
           navigate("/admin/venues"); // Navigate back to the venue list page
-        } catch (error) {
-            
-          console.error('Error saving venue:', error.message);
+        } catch (error) {          
+          showToast("Failed to create venue: " + error.message, "error");
         }
       };
     
     const handleSaveVenueDamage = async (venueId, damage) => {
         try {
+            console.log(damage);
           if (damage.length > 0) {
             const venueDamages = damage.map((group) => ({
               venue_id: venueId,
@@ -151,12 +169,12 @@ const CreateVenue = () => {
           }
         } catch (error) {
             showToast('Error saving venue damage', 'error');
-            console.error("Error saving venue damage:", error.message);
         }
       };
     
     const handleSaveVenueMenu = async (venueId, menu) => {
         try {
+            console.log(menu);
           if (menu.length > 0) {
             const venueMenu = menu.map((item) => ({
               venue_id: venueId,
@@ -172,7 +190,26 @@ const CreateVenue = () => {
           }
         } catch (error) {
             showToast('Error saving venue menu', 'error');
-            console.error("Error saving venue menu:", error.message);
+        }
+      };
+
+      const handleSaveVenueRedeemItem = async (venueId, item) => {
+        try {
+            console.log(item);
+          if (item.length > 0) {
+            const venueRedeemItem = item.map((item) => ({
+              venue_id: venueId,
+              item_id: selectedItem,
+              amount: item.amount,
+              created_at: new Date().toISOString(),
+              modified_at: new Date().toISOString(),  
+            }));
+    
+            const { error } = await supabase.from("venue_redeemitem").insert(venueRedeemItem);
+            if (error) throw error;
+          }
+        } catch (error) {
+            showToast('Error saving venue redeem Item', 'error');
         }
       };
 
@@ -257,6 +294,34 @@ const CreateVenue = () => {
         }));
       };
 
+    const handleRedeemItemChange = (index, field, value) => {
+        setFormData((prev) => {
+          const updatedItem = [...prev.item];
+          updatedItem[index][field] = value;
+          return { ...prev, item: updatedItem };
+        });
+      };
+
+      const addRedeemItemGroup = () => {
+        setFormData((prev) => ({
+          ...prev,
+          item: [
+            ...prev.item,
+            {
+              item_name: "",
+              amount: "",
+            },
+          ],
+        }));
+      };
+    
+    const removeRedeemItemGroup = (index) => {
+        setFormData((prev) => ({
+          ...prev,
+          item: prev.item.filter((_, i) => i !== index),
+        }));
+      };
+
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
@@ -269,153 +334,106 @@ const CreateVenue = () => {
 
             <div className="outsider">
                 <div className="insider">
-                    <div className="field-container">
-                        <label>Venue Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.venue_name}
-                            onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
-                            required
-                        />
-                    </div>
 
-                    <div className="field-container">
-                        <label>Address:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.address}
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Venue Name:"
+                        value={formData.venue_name}
+                        onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                        required
+                    />
 
-                    <div className="field-container">
-                        <label>Category:</label>
-                        <select
-                            id="venue_category"
-                            value={formData.venue_category_id}
-                            onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
-                            className="enhanced-input"
-                        >
-                            <option value="">Select a category</option>
-                            {venueCategories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.category_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <TextArea
+                        label="Address:"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        rows={5} 
+                        required
+                    />
 
-                    <div className="field-container">
-                        <label>Happy Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.happy_hours}
-                            onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
-                        />
-                    </div>
+                    <SingleSelect 
+                        label="Category" 
+                        options={venueCategories} 
+                        selectedValue={selectedCategory} 
+                        onChange={setSelectedCategory} 
+                        placeholder="Choose a category"
+                   />
 
-                    <div className="field-container">
-                        <label>Night Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.night_hours}
-                            onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Happy Hours:"
+                        value={formData.happy_hours}
+                        onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <label>Morning Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.morning_hours}
-                            onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Night Hours:"
+                        value={formData.night_hours}
+                        onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <label>Opening Hours:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.opening_hours}
-                            onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Morning Hours:"
+                        value={formData.morning_hours}
+                        onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <OptionRange
-                            value={formData.price} // Current value
-                            max={5} // Max icons
-                            type="price" // Star icon
-                            onChange={handlePriceChange} // Callback
-                        />
-                        <p>Selected Price Level: {formData.price}</p>
-                    </div>
+                    <TextArea
+                        label="Opening Hours:"
+                        value={formData.opening_hours}
+                        onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
+                        rows={5} 
+                        required
+                    />
 
-                    <div className="field-container">
-                        <label>Drink Min Spend:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.drink_min_spend}
-                            onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
-                        />
-                    </div>
+                    <OptionRange
+                        value={formData.price}
+                        max={5}
+                        type="price"
+                        onChange={handlePriceChange}
+                    />
 
-                    <div className="field-container">
-                        <label>Recommended Tags:</label>
-                        <Select
-                            options={recommendedTags} // Pass the fetched languages
-                            isMulti // Enable multi-select
-                            value={recommendedTags.filter((option) =>
-                                (formData.recommended_tags_id || []).includes(option.value)
-                            )} // Match selected values with formData
-                            onChange={(selectedOptions) =>
-                                setFormData({
-                                ...formData,
-                                recommended_tags_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
-                                })
-                            }
-                            placeholder="Choose at least one recommended tag"
-                            className="mt-1 block w-full text-black"
-                            classNamePrefix="react-select" // Optional styling customization
-                        />
+                    <PlainInput
+                        label="Drink Min Spend:"
+                        value={formData.drink_min_spend}
+                        onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
+                    />
 
-                    </div>
+                    <MultiSelect
+                        label="Recommended Tags:"
+                        options={recommendedTags}
+                        selectedValues={formData.recommended_tags_id}
+                        onChange={(selected) => setFormData({ ...formData, recommended_tags_id: selected })}
+                        placeholder="Choose one or more recommended tag"
+                    />
 
-                    <div className="field-container">
-                        <label>Languages:</label>
-                        <Select
-                            options={languages} // Pass the fetched languages
-                            isMulti // Enable multi-select
-                            value={languages.filter((option) =>
-                                (formData.language_id || []).includes(option.value)
-                            )} // Match selected values with formData
-                            onChange={(selectedOptions) =>
-                                setFormData({
-                                ...formData,
-                                language_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
-                                })
-                            }
-                            placeholder="Choose at least one language"
-                            className="mt-1 block w-full text-black"
-                            classNamePrefix="react-select" // Optional styling customization
-                        />
+                    <MultiSelect
+                        label="Languages:"
+                        options={languages}
+                        selectedValues={formData.language_id}
+                        onChange={(selected) => setFormData({ ...formData, language_id: selected })}
+                        placeholder="Choose one or more language"
+                    />
 
-                    </div>
+                    <MultiSelect
+                        label="Managers:"
+                        options={managers}
+                        selectedValues={formData.manager_id}
+                        onChange={(selected) => setFormData({ ...formData, manager_id: selected })}
+                        placeholder="Choose one or more manager"
+                    />
 
-                    <div className="field-container">
-                        <label>Playability:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.playability}
-                            onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
-                        />
-                    </div>
+                    <MultiSelect
+                        label="Similar Place:"
+                        options={venues}
+                        selectedValues={formData.similar_place_id}
+                        onChange={(selected) => setFormData({ ...formData, similar_place_id: selected })}
+                        placeholder="Choose one or more similar place"
+                    />
+
+                    <PlainInput
+                        label="Playability:"
+                        value={formData.playability}
+                        onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
+                    />
 
                     <ImageUpload onUpload={handleImageUpload} />
 
@@ -427,19 +445,15 @@ const CreateVenue = () => {
 
             {/* Tabs Navigation */}
             <div style={{ display: "flex", marginBottom: "20px" }}>
-                {["General Info", "Menu"].map((tab, index) => (
+                {["General Info", "Menu", "Redeem Items"].map((tab, index) => (
                 <div
                     key={index}
                     onClick={() => handleTabChange(index)}
                     style={{
-                    cursor: "pointer",
-                    padding: "10px 20px",
                     backgroundColor: activeTab === index ? "#4CAF50" : "#f0f0f0",
                     color: activeTab === index ? "white" : "black",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    marginRight: "5px",
                     }}
+                    className="tab-navigation"
                 >
                     {tab}
                 </div>
@@ -451,7 +465,7 @@ const CreateVenue = () => {
                 <div>
                 <h2>Damage Details</h2>
                 {formData.damage.map((group, index) => (
-                    <div
+                <div
                     key={index}
                     className="enhanced-input"
                     >
@@ -524,38 +538,27 @@ const CreateVenue = () => {
                         className="enhanced-input"
                     />
 
-                    <button
+                    <FaMinusCircle
+                        size={50}  
                         onClick={() => removeDamageGroup(index)}
                         style={{
-                        background: "#f44336",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "5px 10px",
                         cursor: "pointer",
-                        marginTop: "10px",
-                        width: "15%",
+                        color: "#f44336",
+                        margin: "15px",
                         }}
-                    >
-                        Remove Group
-                    </button>
-                    </div>
-                ))}
-                <button
+                    />
+                </div>
+                    ))
+                }
+                    <FaPlusCircle
+                    size={50}  
                     onClick={addDamageGroup}
                     style={{
-                    marginTop: "10px",
-                    padding: "10px 20px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    width: "25%",
-                    }}
-                >
-                    + Add Damage Group
-                </button>
+                        cursor: "pointer",
+                        color: "#4CAF50",
+                        margin: "15px",
+                        }}
+                    />
                 </div>
             )}
 
@@ -592,38 +595,71 @@ const CreateVenue = () => {
                                 }
                                 className="enhanced-input"
                             />
-                            <button
+                            <FaMinusCircle
+                                size={50}  
                                 onClick={() => removeMenuGroup(index)}
                                 style={{
-                                background: "#f44336",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                padding: "5px 10px",
                                 cursor: "pointer",
-                                marginTop: "10px",
-                                width: "15%",
+                                color: "#f44336",
+                                margin: "15px",
                                 }}
-                            >
-                                Remove Menu Group
-                            </button>
+                            />
                             </div>
                         ))}
-                        <button
+                            <FaPlusCircle
+                            size={50}  
                             onClick={addMenuGroup}
                             style={{
-                            marginTop: "10px",
-                            padding: "10px 20px",
-                            backgroundColor: "#4CAF50",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            width: "25%",
-                            }}
-                        >
-                            + Add Menu Group
-                        </button>
+                                cursor: "pointer",
+                                color: "#4CAF50",
+                                margin: "15px",
+                                }}
+                            />
+                </div>
+            )}
+
+            {activeTab === 2 && (
+                <div style={{ marginTop: "20px" }}>
+                    <h2>Redeem Items</h2>
+                    {formData.item.map((groupRedeem, index) => (
+                        <div key={index} className="enhanced-input">
+
+                            <SingleSelect 
+                                label="Item Name" 
+                                options={items} 
+                                selectedValue={selectedItem} 
+                                onChange={setSelectedItem} 
+                                placeholder="Choose an item"
+                            />
+                            <PlainInput
+                                label="Amount"
+                                type="text"
+                                value={groupRedeem.amount}
+                                onChange={(e) =>
+                                handleRedeemItemChange(index, "amount", e.target.value)
+                                }
+                                className="enhanced-input"
+                            />
+                            <FaMinusCircle
+                                size={50}  
+                                onClick={() => removeRedeemItemGroup(index)}
+                                style={{
+                                cursor: "pointer",
+                                color: "#f44336",
+                                margin: "15px",
+                                }}
+                            />
+                            </div>
+                        ))}
+                            <FaPlusCircle
+                            size={50}  
+                            onClick={addRedeemItemGroup}
+                            style={{
+                                cursor: "pointer",
+                                color: "#4CAF50",
+                                margin: "15px",
+                                }}
+                            />
                 </div>
             )}
 
@@ -635,7 +671,8 @@ const CreateVenue = () => {
                     backgroundColor: "#4CAF50",
                     color: "white",
                     border: "none",
-                    borderRadius: "4px",
+                    borderRadius: "25px",
+                    width: "20%",
                 }}
             >
                 Save

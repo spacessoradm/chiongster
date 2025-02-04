@@ -17,6 +17,8 @@ const EditVenue = () => {
     const { id } = useParams();
     const [venueCategories, setVenueCategories] = useState([]);
     const [recommendedTags, setRecommendedTags] = useState([]);
+    const [venues, setVenues] = useState([]);
+    const [managers, setManagers] = useState([]);
     const [languages, setLanguages] = useState([]);
     const [formData, setFormData] = useState({
         venue_name: "",
@@ -30,6 +32,8 @@ const EditVenue = () => {
         drink_min_spend: "",
         recommended_tags_id: [],
         language_id: [],
+        manager_id: [],
+        similar_place_id: [],
         playability: "",
         minimum_tips: "",
         venue_category_id: "",
@@ -67,6 +71,8 @@ const EditVenue = () => {
                     drink_min_spend: venue.drink_min_spend,
                     recommended_tags_id: venue.recommended || [],
                     language_id: venue.language || [],
+                    manager_id: venue.manager_id || [],
+                    similar_place_id: venue.similar_place_id || [],
                     playability: venue.playability,
                     minimum_tips: venue.minimum_tips,
                     venue_category_id: venue.venue_category_id,
@@ -80,6 +86,21 @@ const EditVenue = () => {
         };
 
         const fetchDropdownData = async () => {
+
+            const { data: venueList, error: venueListError } = 
+                await supabase.from("venues").select("id, venue_name");
+            if (venueListError) throw venueListError;
+            setVenues(
+                venueList.map((venue) => ({
+                    value: venue.id,
+                    label: venue.venue_name,
+                }))
+            );
+
+            console.log(venueList);
+            console.log(venues);
+
+
             const { data: venuecategories } = await supabase.from("venue_category").select("*");
             setVenueCategories(venuecategories);
 
@@ -100,6 +121,16 @@ const EditVenue = () => {
                 language.map((lang) => ({
                     value: lang.id,
                     label: lang.language_name,
+                }))
+            );
+
+            const { data: manager, error: managerError } = 
+                await supabase.from("manager_profiles").select("*").eq("status", 'approved');
+            if (managerError) throw managerError;
+            setManagers(
+                manager.map((mang) => ({
+                    value: mang.id,
+                    label: mang.username,
                 }))
             );
         };
@@ -123,6 +154,8 @@ const EditVenue = () => {
                     drink_min_spend: formData.drink_min_spend,
                     recommended: formData.recommended_tags_id,
                     language: formData.language_id,
+                    manager_id: formData.manager_id,
+                    similar_place_id: formData.similar_place_id,
                     playability: formData.playability,
                     minimum_tips: formData.minimum_tips,
                     venue_category_id: formData.venue_category_id,
@@ -280,8 +313,7 @@ const EditVenue = () => {
                                 })
                             }
                             placeholder="Choose at least one recommended tag"
-                            className="mt-1 block w-full text-black"
-                            classNamePrefix="react-select"
+                            className="enhanced-input"
                         />
                     </div>
 
@@ -300,8 +332,45 @@ const EditVenue = () => {
                                 })
                             }
                             placeholder="Choose at least one language"
-                            className="mt-1 block w-full text-black"
-                            classNamePrefix="react-select"
+                            className="enhanced-input"
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Managers:</label>
+                        <Select
+                            options={managers}
+                            isMulti
+                            value={managers.filter((option) =>
+                                (formData.manager_id || []).includes(option.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                    ...formData,
+                                    manager_id: selectedOptions.map((option) => option.value),
+                                })
+                            }
+                            placeholder="Choose at least one manager"
+                            className="enhanced-input"
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Similar Places:</label>
+                        <Select
+                            options={venues}
+                            isMulti
+                            value={venues.filter((option) =>
+                                (formData.similar_place_id || []).includes(option.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                    ...formData,
+                                    similar_place_id: selectedOptions.map((option) => option.value),
+                                })
+                            }
+                            placeholder="Choose similar place"
+                            className="enhanced-input"
                         />
                     </div>
 
@@ -351,6 +420,14 @@ const EditVenue = () => {
                         <label>Edit Venue Menu:</label>
                         <FaEdit 
                             onClick={() => navigate(`/admin/venues/editmenu/${id}`)}
+                            title='Edit'
+                            className='edit-button'
+                        />
+                    </div>
+                    <div className="field-container">
+                        <label>Edit Venue Redeem Item:</label>
+                        <FaEdit 
+                            onClick={() => navigate(`/admin/venues/editredeemitem/${id}`)}
                             title='Edit'
                             className='edit-button'
                         />

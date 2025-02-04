@@ -65,6 +65,11 @@ const adminNavBarItems = [
                 icon: <FaListAlt />,
             },
             {
+                title: "Manage Notis",
+                link: "/admin/notis",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Language",
                 link: "/admin/languages",
                 icon: <FaListAlt />,

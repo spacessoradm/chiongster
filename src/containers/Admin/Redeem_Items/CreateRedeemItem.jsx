@@ -61,8 +61,8 @@ const CreateRedeemItem = () => {
                     {
                         item_name: formData.itemName,
                         item_description: formData.itemDescription,
-                        amount: formData.itemAmount,
-                        venue_id: formData.venueId, 
+                        amount: null,
+                        venue_id: null, 
                         pic_path: formData.pic_path,
                         created_at: new Date().toISOString(),
                         modified_at: new Date().toISOString(),
@@ -119,38 +119,6 @@ const CreateRedeemItem = () => {
                             required
                             className="enhanced-input"
                         ></textarea>
-                    </div>
-
-                    <div className="field-container">
-                        <label htmlFor="categoryName">Amount:</label>
-                        <input
-                            className='enhanced-input'
-                            type="text"
-                            id="itemAmount"
-                            name="itemAmount"
-                            value={formData.itemAmount}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="field-container">
-                        <label htmlFor="venueId">Venue:</label>
-                        <select
-                            className='enhanced-input'
-                            id="venueId"
-                            name="venueId"
-                            value={formData.venueId}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select a Venue</option>
-                            {venues.map((venue) => (
-                                <option key={venue.id} value={venue.id}>
-                                    {venue.venue_name}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
                     <CreateRedeemImage onUpload={handleImageUpload} />
