@@ -109,7 +109,7 @@ const EditRedeemItem = () => {
                 .update({
                     item_name: formData.itemName,
                     item_description: formData.itemDescription,
-                    amount: null,
+                    amount: 0,
                     venue_id: null,
                     pic_path: newImageUrl,
                     modified_at: new Date().toISOString(),
