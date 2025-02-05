@@ -42,12 +42,18 @@ const ViewAlcoholBalance = () => {
                 const users = userRes.data;
                 const alcohols = alcoholRes.data;
 
+                console.log(venues)
+                console.log(users)
+                console.log(alcohols)
+
                 // Merge alcohol data with venue name and username
                 const mergedData = {
                     ...alcohols,
                     venue_name: venues.find((venue) => venue.id === alcohols.venue_id)?.venue_name || "Unknown Venue",
                     username: users.find((user) => user.id === alcohols.user_id)?.username || "Unknown User"
                 };
+
+                console.log(mergedData)
 
                 setFormData({
                     alcohol_name: mergedData.alcohol_name,
@@ -59,7 +65,6 @@ const ViewAlcoholBalance = () => {
                     image_paths: mergedData.image_paths || [],
                 });
 
-                console.log(formData)
             } catch (err) {
                 showToast(`Error fetching data: ${err.message}`, 'error');
             }
