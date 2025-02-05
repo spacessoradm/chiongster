@@ -70,6 +70,11 @@ const adminNavBarItems = [
                 icon: <FaListAlt />,
             },
             {
+                title: "Manage Footer Menu",
+                link: "/admin/footermenu",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Notis",
                 link: "/admin/notis",
                 icon: <FaListAlt />,
