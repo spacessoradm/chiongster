@@ -95,6 +95,12 @@ import CreateAlcoholBalance from './containers/Admin/Alcohol_Balance/CreateAlcoh
 import ViewAlcoholBalance from './containers/Admin/Alcohol_Balance/ViewAlcoholBalance';
 import EditAlcoholBalance from './containers/Admin/Alcohol_Balance/EditAlcoholBalance';
 
+import FooterMenu from './containers/Admin/Footer_Menu/index.jsx';
+import CreateFooterMenu from './containers/Admin/Footer_Menu/CreateFooterMenu';
+//import ViewFooterMenu from './containers/Admin/Footer_Menu/ViewFooterMenu';
+import EditFooterMenu from './containers/Admin/Footer_Menu/EditFooterMenu';
+import CreateSubFooterMenu from './containers/Admin/Footer_Menu/CreateSubFooterMenu';
+
 const App = () => {
     const { userRole } = useAuth();
     const [loading, setLoading] = useState(false);
@@ -636,6 +642,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <ViewAlcoholBalance/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/footermenu"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <FooterMenu />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/footermenu/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateFooterMenu/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/footermenu/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditFooterMenu/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/footermenu/create/submenu/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateSubFooterMenu/>
                                     </AdminLayout>
                                 }
                             />
