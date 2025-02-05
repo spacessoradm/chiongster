@@ -22,14 +22,6 @@ import Profile from './containers/Client/Profile';*/
 import AdminLayout from './components/AdminLayout';
 import SideNavBar from './containers/Admin/Admin_Navigation/SideNavBar';
 import AdminDashboard from './containers/Admin/Admin_Dashboard';
-import AdminRecipeNavigation from './containers/Admin/Admin_Recipe/AdminRecipeNavigation';
-
-/*import AdminUsers from './containers/Admin/Admin_Users';
-import CreateUser from './containers/Admin/Admin_Users/CreateUser';
-import ViewUser from './containers/Admin/Admin_Users/ViewUser';
-import EditUser from './containers/Admin/Admin_Users/EditUser';
-*/
-
 
 //Chiongster
 import AppUsers from './containers/Admin/App_Users/index.jsx';
@@ -97,6 +89,11 @@ import Notis from './containers/Admin/Notis/index.jsx';
 import CreateNotis from './containers/Admin/Notis/CreateNotis';
 import ViewNotis from './containers/Admin/Notis/ViewNotis';
 import EditNotis from './containers/Admin/Notis/EditNotis';
+
+import AlcoholBalance from './containers/Admin/Alcohol_Balance/index.jsx';
+import CreateAlcoholBalance from './containers/Admin/Alcohol_Balance/CreateAlcoholBalance';
+import ViewAlcoholBalance from './containers/Admin/Alcohol_Balance/ViewAlcoholBalance';
+import EditAlcoholBalance from './containers/Admin/Alcohol_Balance/EditAlcoholBalance';
 
 const App = () => {
     const { userRole } = useAuth();
@@ -605,6 +602,40 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <ViewNotis/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/alcoholbalance"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <AlcoholBalance />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/alcoholbalance/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateAlcoholBalance/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/alcoholbalance/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditAlcoholBalance/>
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/alcoholbalance/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewAlcoholBalance/>
                                     </AdminLayout>
                                 }
                             />
