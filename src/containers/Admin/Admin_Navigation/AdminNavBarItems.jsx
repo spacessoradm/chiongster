@@ -35,6 +35,11 @@ const adminNavBarItems = [
         icon: <FaUser />,
     },
     {
+        title: "Manage Alcohol Balance",
+        link: "/admin/alcoholbalance",
+        icon: <FaUser />,
+    },
+    {
         title: "Manage Drink Dollars",
         link: "/admin/drinkdollars",
         icon: <FaUser />,
