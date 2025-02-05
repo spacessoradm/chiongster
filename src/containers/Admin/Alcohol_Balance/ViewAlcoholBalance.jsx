@@ -58,6 +58,8 @@ const ViewAlcoholBalance = () => {
                     reminder: mergedData.reminder,
                     image_paths: mergedData.image_paths || [],
                 });
+
+                console.log(formData)
             } catch (err) {
                 showToast(`Error fetching data: ${err.message}`, 'error');
             }
