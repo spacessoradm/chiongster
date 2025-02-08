@@ -56,6 +56,7 @@ import Bookings from './containers/Admin/Bookings/index.jsx';
 import CreateBooking from './containers/Admin/Bookings/CreateBooking';
 import ViewBooking from './containers/Admin/Bookings/ViewBooking';
 import EditBooking from './containers/Admin/Bookings/EditBooking';
+import EditRedemption from './containers/Admin/Bookings/EditRedemption';
 
 import Managers from './containers/Admin/Managers/index.jsx';
 import CreateManager from './containers/Admin/Managers/CreateManager';
@@ -393,6 +394,15 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditBooking/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/bookings/editredemption/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditRedemption/>
                                     </AdminLayout>
                                 }
                             />
