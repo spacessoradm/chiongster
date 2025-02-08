@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+
+import './index.css';
+import SearchBar from '../../../components/SearchBarSection';
+import Toast from '../../../components/Toast';
+import Pagination from '../../../components/pagination';
 
 const Bookings = () => {
   const navigate = useNavigate();
@@ -14,51 +20,51 @@ const Bookings = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const limit = 10;
+  const limit = 15;
+  const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
-  const fetchBookings = async (pageNumber = 1) => {
+  const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+  };
+
+  const fetchDataList = async (pageNumber = 1) => {
     setLoading(true);
-    setError(null);
+
     try {
       const start = (pageNumber - 1) * limit;
       const end = start + limit - 1;
 
-      const { data: bookingsData, error: bookingsError } = await supabase
+      const { data: bookingList, error: bookingListError } = await supabase
         .from('booking')
-        .select('*');
+        .select('*')
+        .range(start, end);
 
-      if (bookingsError) throw bookingsError;
+      if (bookingListError){
+        showToast("Failed to fetch booking list. " + bookingListError , "error");
+      }
 
-      const { data: profilesData, error: profilesError } = await supabase
+      const { data: profileNameList, error: profileNameListError } = await supabase
         .from('profiles')
-        .select('*');
+        .select('id, username');
 
-      if (profilesError) throw profilesError;
+      if (profileNameListError){
+        showToast("Failed to fetch profile name list. " + profileNameListError , "error");
+      }
+ 
 
-      // Merge the data
-      const usersWithBookings = profilesData.map(profilesDt => {
-        const userBooking = bookingsData.find(bookingsDt => bookingsDt.user_id === profilesDt.id);
-      
-        if (userBooking) {
-          return {
-            id: userBooking.id, // Access the `userBooking` object
-            user: profilesDt.username,
-            checkin_date: userBooking.checkin_date, // Ensure the correct field is used
-            booking_date: userBooking.created_at,
-          };
+      bookingList.forEach(booking => {
+        const profile = profileNameList.find(prof => prof.id === booking.user_id);
+        if (profile) {
+          booking.username = profile.username;
         }
-      
-        // Return null or handle missing data appropriately
-        return null; 
-      }).filter(Boolean); // Filter out any null values
-      
+      });
 
-      setBookings(usersWithBookings);
-      setFilteredBookings(usersWithBookings);
-      setTotalPages(Math.ceil(usersWithBookings.length / limit));
+      setBookings(bookingList);
+      setFilteredBookings(bookingList);
+      setTotalPages(Math.ceil(bookingList.length / limit));
     } catch (error) {
-      setError("Failed to fetch bookings.");
-      console.error(error);
+      showToast("Failed to fetch booking list. " + error , "error");
     } finally {
       setLoading(false);
     }
@@ -70,7 +76,7 @@ const Bookings = () => {
 
     if (term) {
       const filtered = bookings.filter((booking) =>
-        booking.user.toLowerCase().includes(term)
+        booking.username.toLowerCase().includes(term)
       );
       setFilteredBookings(filtered);
     } else {
@@ -85,18 +91,18 @@ const Bookings = () => {
     }
     setSortConfig({ key, direction });
 
-    fetchBookings(page);
+    fetchDataList(page);
   };
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
-      fetchBookings(newPage);
+      fetchDataList(newPage);
     }
   };
 
   useEffect(() => {
-    fetchBookings(page);
+    fetchDataList(page);
   }, [page]);
 
   const deleteBooking = async (id) => {
@@ -127,193 +133,90 @@ const Bookings = () => {
     }
   };
 
+  const handleRefresh = () => fetchDataList(page);
+
+  const handleCreate = () => navigate("create");
+
   return (
     <div className='venue-category' style={{ fontFamily: "Courier New" }}>
-      <h2>Manage Booking</h2>
-      <p></p>
+      <p className='title-page'>Booking Module</p>
+      <p className='subtitle-page'>Manage user booking here.</p>
 
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px", fontFamily: "Courier New" }}>
-        <input
-          type="text"
-          placeholder="Search bookings..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{
-            padding: "10px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            width: "100%",
-            maxWidth: "400px",
-          }}
-        />
-        <button
-          onClick={() => fetchBookings(page)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "4px",
-            border: "none",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Refresh
-        </button>
-        <button
-          onClick={() => navigate("create")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "4px",
-            border: "none",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Create
-        </button>
-      </div>
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
+        onRefresh={handleRefresh}
+        onCreate={handleCreate}
+      />
 
-      {loading && <p>Loading bookings...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {/* Show loading state */}
+      {loading && <p>Loading records...</p>}
 
-      {!loading && !error && filteredBookings.length > 0 ? (
+      {toastInfo.visible && (
+        <Toast message={toastInfo.message} type={toastInfo.type} />
+      )}
+
+      {!loading && filteredBookings.length > 0 ? (
         <>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              fontFamily: "Courier New",
-            }}
-          >
+          <table className='table-container'>
             <thead>
-              <tr style={{ backgroundColor: "#f4f4f4" }}>
-                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>ID</th>
+              <tr className='header-row'>
+                <th className='normal-header'>ID</th>
                 <th
                   onClick={() => handleSort("user")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   User {sortConfig.key === "user" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => handleSort("checkin_date")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
-                  Checkin Date {sortConfig.key === "checkin_date" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                  CheckIn Date {sortConfig.key === "checkin_date" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
                 <th
                   onClick={() => handleSort("booking_date")}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                  }}
+                  className='sort-header'
                 >
                   Booking Date {sortConfig.key === "booking_date" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                 </th>
-                <th style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>Actions</th>
+                <th className='normal-header'>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredBookings.map((booking) => (
                 <tr key={booking.id}>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{booking.id}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{booking.user}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{booking.checkin_date}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px" }}>{booking.booking_date}</td>
-                  <td style={{ border: "1px solid #ccc", padding: "10px", textAlign: "center" }}>
-                    <button
+                  <td className='normal-column'>{booking.id}</td>
+                  <td className='normal-column'>{booking.username}</td>
+                  <td className='normal-column'>{new Date(booking.preferred_date).toLocaleDateString()}</td>
+                  <td className='normal-column'>{new Date(booking.created_at).toLocaleString()}</td>
+                  <td className='action-column'>
+                    <FaEye
                       onClick={() => navigate(`/admin/bookings/view/${booking.id}`)}
-                      style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#FFA500",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      View
-                    </button>
-                    <button
+                      title='View'
+                      className='view-button'
+                    />
+                    <FaEdit 
                       onClick={() => navigate(`/admin/bookings/edit/${booking.id}`)}
-                      style={{
-                        marginRight: "10px",
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#2196F3",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
+                      title='Edit'
+                      className='edit-button'
+                    />
+                    <FaTrashAlt 
                       onClick={() => deleteBooking(booking.id)}
-                      style={{
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: "#f44336",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Delete
-                    </button>
+                      title='Delete'
+                      className='delete-button'
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div style={{ marginTop: "20px", textAlign: "center" }}>
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              style={{
-                marginRight: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              Previous
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              style={{
-                marginLeft: "10px",
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       ) : (
         !loading && <p>No Bookings found.</p>

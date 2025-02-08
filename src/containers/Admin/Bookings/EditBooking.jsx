@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
 import './EditBooking.css';
+import { FaEdit, } from "react-icons/fa";
+
+import Toast from '../../../components/Toast';
+import BackButton from '../../../components/Button/BackArrowButton';
+import ReceiptUploader from '../../../components/Input/ImageUpload/ReceiptUploader';
 
 const EditBooking = () => {
     const navigate = useNavigate();
@@ -15,57 +20,13 @@ const EditBooking = () => {
     const [notes, setNotes] = useState("");
     const [venues, setVenues] = useState([]);
     const [users, setUsers] = useState([]);
+    const [uploaded, setUploaded] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+
     const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({
-        item_name: "",
-        quantity: "",
-        amount: "",
-    });
     const [message, setMessage] = useState("");
-
-    const toggleModal = () => {
-      setShowModal(!showModal);
-      setMessage(""); // Reset any messages when the modal is toggled
-    };
-  
-    // Handle form input changes
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    };
-
-    // Handle Redemption form submission
-    const handleRedemptionSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-        const { data, error } = await supabase
-            .from("redemption")
-            .insert([
-            {
-                booking_id: id,
-                item_name: formData.item_name,
-                quantity: parseInt(formData.quantity, 10),
-                amount: parseFloat(formData.amount),
-                created_at: new Date().toISOString(),
-                modified_at: new Date().toISOString(),
-            },
-            ]);
-
-        if (error) throw error;
-
-        setMessage("Redemption details added successfully!");
-        setFormData({ item_name: "", quantity: "", amount: "" }); // Reset form fields
-        } catch (error) {
-        setMessage(`Error: ${error.message}`);
-        }
-    };
 
     // Fetch venues, users, and existing booking data
     useEffect(() => {
@@ -109,6 +70,7 @@ const EditBooking = () => {
                 setRoomNo(bookingData.room_no);
                 setManager(bookingData.manager);
                 setNotes(bookingData.notes);
+                setUploaded(bookingData.uploaded);
             }
         };
 
@@ -127,7 +89,6 @@ const EditBooking = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
         try {
             const { error: bookingError } = await supabase
@@ -140,6 +101,7 @@ const EditBooking = () => {
                     room_no: roomNo,
                     manager: manager,
                     notes: notes,
+                    uploaded: uploaded,
                     modified_at: new Date().toISOString(),
                 })
                 .eq('id', id);
@@ -155,167 +117,149 @@ const EditBooking = () => {
         }
     };
 
+    const handleReceiptImageUpload = (url) => {
+        //setFormData((prev) => ({ ...prev, uploaded: url }));
+        setUploaded(url);
+    };
+
     return (
         <div className="edit-booking-container" style={{ fontFamily: 'Courier New' }}>
-            <div className="edit-booking-header">
-                <h2>Edit Booking</h2>
-                <button className="back-btn" onClick={() => navigate('/admin/bookings')}>
-                    Back to Booking List
-                </button>
-                <button className="open-modal-btn" style={{ marginLeft: '10px' }} onClick={toggleModal}>
-                    Redeem a drink
-                </button>
-            </div>
+            <BackButton to="/admin/bookings" />
+            <h2>Edit Booking</h2>
 
             {error && <div className="error-message">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="edit-booking-form" style={{ paddingTop: '20px' }}>
+            <form onSubmit={handleSubmit} className="outsider">
 
-                <div className="form-group">
-                    <label>User:</label>
-                    <select
-                        value={userId}
-                        onChange={(e) => handleUserChange(e.target.value)}
-                        required
-                    >
-                        <option value="" disabled>
-                            Select a user
-                        </option>
-                        {users.map((user) => (
-                            <option key={user.id} value={user.id}>
-                                {user.username}
+                <div className="insider">
+                    <div className="field-container">
+                        <label>User:</label>
+                        <select
+                            value={userId}
+                            onChange={(e) => handleUserChange(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        >
+                            <option value="" disabled>
+                                Select a user
                             </option>
-                        ))}
-                    </select>
-                </div>
+                            {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.username}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div className="form-group">
-                    <label>Venue:</label>
-                    <select
-                        value={venueId}
-                        onChange={(e) => handleVenueChange(e.target.value)}
-                        required
-                    >
-                        <option value="" disabled>
-                            Select a venue
-                        </option>
-                        {venues.map((venue) => (
-                            <option key={venue.id} value={venue.id}>
-                                {venue.venue_name}
+                    <div className="field-container">
+                        <label>Venue:</label>
+                        <select
+                            value={venueId}
+                            onChange={(e) => handleVenueChange(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        >
+                            <option value="" disabled>
+                                Select a venue
                             </option>
-                        ))}
-                    </select>
+                            {venues.map((venue) => (
+                                <option key={venue.id} value={venue.id}>
+                                    {venue.venue_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="field-container">
+                        <label>Check-in Date:</label>
+                        <input
+                            type="date"
+                            value={checkinDate || ''}
+                            onChange={(e) => {
+                                console.log('Selected Date:', e.target.value);
+                                setCheckinDate(e.target.value);
+                            }}
+                            className='enhanced-input'
+                            required
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>No. of Pax:</label>
+                        <input
+                            type="text"
+                            value={pax}
+                            onChange={(e) => setPax(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Room No.:</label>
+                        <input
+                            type="text"
+                            value={roomNo}
+                            onChange={(e) => setRoomNo(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Manager:</label>
+                        <input
+                            type="text"
+                            value={manager}
+                            onChange={(e) => setManager(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Notes:</label>
+                        <input
+                            type="text"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className='enhanced-input'
+                            required
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Receipt:</label>
+                        {uploaded && (
+                            <img src={`${uploaded}`} alt="Current Receipt" style={{ maxWidth: "200px" }} />
+                        )}
+                        <ReceiptUploader onUpload={handleReceiptImageUpload} />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Edit Redeem Item:</label>
+                        <FaEdit 
+                            onClick={() => navigate(`/admin/bookings/editredemption/${id}`)}
+                            title='Edit'
+                            className='edit-button'
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Credit Drink Dollar:</label>
+                        <FaEdit 
+                            onClick={() => navigate(`/admin/drinkdollars/createtransaction/${userId}`)}
+                            title='Edit'
+                            className='edit-button'
+                        />
+                    </div>
+
+                    <button type="submit" className="submit-btn" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Booking'}
+                    </button>
                 </div>
 
-                <div className="form-group">
-                    <label>Check-in Date:</label>
-                    <input
-                        type="date"
-                        value={checkinDate || ''}
-                        onChange={(e) => {
-                            console.log('Selected Date:', e.target.value);
-                            setCheckinDate(e.target.value);
-                        }}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>No. of Pax:</label>
-                    <input
-                        type="text"
-                        value={pax}
-                        onChange={(e) => setPax(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Room No.:</label>
-                    <input
-                        type="text"
-                        value={roomNo}
-                        onChange={(e) => setRoomNo(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Manager:</label>
-                    <input
-                        type="text"
-                        value={manager}
-                        onChange={(e) => setManager(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Notes:</label>
-                    <input
-                        type="text"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <button type="submit" className="submit-btn" disabled={loading}>
-                    {loading ? 'Updating...' : 'Update Booking'}
-                </button>
             </form>
-
-            {/* Modal */}
-            {showModal && (
-            <div className="modal-overlay">
-            <div className="modal-content">
-                <h2>Redemption Details</h2>
-                {message && <p>{message}</p>}
-                <form className="redemption-form" onSubmit={handleRedemptionSubmit}>
-                <div className="form-group">
-                    <label>Item Name:</label>
-                    <input
-                    type="text"
-                    name="item_name"
-                    value={formData.item_name}
-                    onChange={handleInputChange}
-                    required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Quantity:</label>
-                    <input
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Amount:</label>
-                    <input
-                    type="number"
-                    step="0.01"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    required
-                    />
-                </div>
-
-                <button type="submit" className="submit-btn">
-                    Submit
-                </button>
-                </form>
-                <button className="close-modal-btn" onClick={toggleModal}>
-                Close
-                </button>
-            </div>
-            </div>
-        )}
         </div>
     );
 };

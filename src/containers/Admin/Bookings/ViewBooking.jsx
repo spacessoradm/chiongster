@@ -2,6 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from "../../../config/supabaseClient";
 import BackButton from '../../../components/Button/BackArrowButton';
+import { FaEye, FaPlus} from "react-icons/fa";
+
+import './ViewBooking.css';
+import Toast from '../../../components/Toast';
+import PlainInput from "../../../components/Input/PlainInput";
+import TextArea from "../../../components/Input/TextArea";
+import Pagination from '../../../components/pagination';
 
 const ViewBooking = () => {
   const { id } = useParams(); // user_id from URL
@@ -12,6 +19,15 @@ const ViewBooking = () => {
   const [redemptions, setRedemptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1); // Current page
+  const [totalPages, setTotalPages] = useState(1); // Total pages
+  const limit = 5;
+  const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+
+  const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -28,8 +44,6 @@ const ViewBooking = () => {
 
           if (bookingError) throw bookingError;
 
-        console.log(bookingData.user_id);
-
         setBooking(bookingData);
 
         // Fetch user details
@@ -42,13 +56,22 @@ const ViewBooking = () => {
 
         setUser(userData);
 
+        console.log("booking id: " + bookingData.id);
+
         const { data: redemptionData, error: redemptionError } = await supabase
           .from("redemption")   
           .select("*")
           .eq("booking_id", bookingData.id);
-        if (redemptionError) throw redemptionError;
+
+        if (redemptionError)
+        {
+          console.error("Error fetching redemption data:", redemptionError);
+          throw redemptionError;
+        } 
 
         setRedemptions(redemptionData);
+
+        console.log("Redemption data: " + JSON.stringify(redemptionData));
 
         const { data: venueData, error: venueError } = await supabase
           .from("venues")   
@@ -76,104 +99,100 @@ const ViewBooking = () => {
 
   return (
     <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-      {/* Back Button */}
-      <BackButton to="/admin/bookings" /> 
+      <BackButton to="/admin/alcoholbalance" />
+      <h2>View Alcohol Balance</h2>
+
+      {toastInfo.visible && (
+          <Toast message={toastInfo.message} type={toastInfo.type} />
+      )}
 
       <div className="edit-user-container">
         <div className="admin-content">
-          <h2>Booking Details</h2>
-          <form>
-            <div className="form-group">
-              <label>Booking Code:</label>
-              <input type="text" value={booking.booking_unique_code} disabled />
-            </div>
+          <form className="outsider">
+            <div className="insider">
+              <PlainInput 
+                label="Booking Code:" 
+                value={booking.booking_unique_code} 
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Venue:</label>
-              <input type="text" value={venues?.venue_name} disabled />
-            </div>
+              <PlainInput 
+                label="Venue:" 
+                value={venues?.venue_name} 
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Venue Address:</label>
-              <input type="text" value={venues?.address} disabled />
-            </div>
+              <TextArea 
+                label="Address:" 
+                value={venues?.venue_address}
+                rows={5} 
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Check In Date:</label>
-              <input type="text" value={booking.preferred_date || ""} disabled />
-            </div>
+              <PlainInput
+                label="Check In Date:"
+                value={new Date(booking.preferred_date).toLocaleDateString()}
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>No. of Pax:</label>
-              <input type="text" value={booking.pax || ""} disabled />
-            </div>
+              <PlainInput
+                label="Session:"
+                value={booking.session}
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Room No.:</label>
-              <input type="text" value={booking.room_no || ""} disabled />
-            </div>
+              <PlainInput
+                label="No. of Pax:"
+                value={booking.pax}
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Manager:</label>
-              <input type="text" value={booking.manager || ""} disabled />
-            </div>
+              <PlainInput
+                label="Room No.:"
+                value={booking.room_no}
+                readOnly  
+              />
 
-            <div className="form-group">
-              <label>Notes:</label>
-              <input type="text" value={booking.notes || ""} disabled />
-            </div>
+              <PlainInput
+                label="Manager:"
+                value={booking.manager}
+                readOnly
+              />
 
-            <div className="form-group">
-              <label>Booking Date:</label>
-              <input type="text" value={booking.created_at || ""} disabled />
+              <TextArea
+                label="Notes:"
+                value={booking.notes}
+                rows={5} 
+                readOnly
+              />
+
+              <PlainInput 
+                label="Booking Date:"
+                value={new Date(booking.created_at).toLocaleString()}
+                readOnly
+              />
             </div>
           </form>
 
           <h3>Redemptions Under this Booking</h3>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginTop: "20px",
-              fontFamily: "Courier New",
-            }}
-          >
+          <table className='table-container'>
             <thead>
               <tr>
-                <th style={{ border: "1px solid #ccc", padding: "10px" }}>Item</th>
-                <th style={{ border: "1px solid #ccc", padding: "10px" }}>Quantity</th>
-                <th style={{ border: "1px solid #ccc", padding: "10px" }}>Amount</th>
-                <th style={{ border: "1px solid #ccc", padding: "10px" }}>created_at</th>
+                <th className="normal-header">Item</th>
+                <th className="normal-header">Quantity</th>
+                <th className="normal-header">Amount</th>
+                <th className="normal-header">created_at</th>
               </tr>
             </thead>
             <tbody>
               {redemptions.length > 0 ? (
                 redemptions.map((redemption) => (
                   <tr key={redemption.id}>
-                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>
-                      {redemption.item_name}
-                    </td>
-                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>
-                      {redemption.quantity}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {redemption.amount}
-                    </td>
-                    <td style={{ border: "1px solid #ccc", padding: "10px" }}>
-                      {new Date(redemption.created_at).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
+                    <td className="normal-column">{redemption.item_name}</td>
+                    <td className="normal-column">{redemption.quantity}</td>
+                    <td className="normal-column">{redemption.amount}</td>
+                    <td className="normal-column">
+                      {new Date(redemption.created_at).toLocaleString()}
                     </td>
                   </tr>
                 ))
