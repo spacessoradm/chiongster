@@ -114,6 +114,12 @@
     cursor: pointer;
   }
 
+  .approve-button {
+    font-size: 25px;
+    color: #4CAF50;
+    cursor: pointer;
+  }
+
   .prev-button {
     margin-right: 10px;
     color: #2196F3;

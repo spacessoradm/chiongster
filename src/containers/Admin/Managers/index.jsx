@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
-import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaCheck, FaEye, FaEdit, FaTrashAlt, FaTimes } from "react-icons/fa";
 import './index.css';
 import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
@@ -89,7 +89,7 @@ const Managers = () => {
 
   const handleCreate = () => navigate("create");
 
-  const deleteManagerProfiles = async (id) => {
+  const deleteManagerProfile = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this manager profile?");
     if (!confirmDelete) return;
 
@@ -113,6 +113,66 @@ const Managers = () => {
       showToast("Manager profile deleted successfully.", "success");
     } catch (err) {
       showToast("Failed to delete manager profile.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const approveManagerProfile = async (id) => {
+    const confirmApprove = window.confirm("Are you sure you want to approve this manager profile?");
+    if (!confirmApprove) return;
+
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from("manager_profiles")
+        .update({ account_status: "approved" })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      /*setManagerProfiles((prevManagerProfiles) =>
+        prevManagerProfiles.filter((managerprofile) => managerprofile.id !== id)
+      );
+      setFilteredManagerProfiles((prevFilteredManagerProfiles) =>
+        prevFilteredManagerProfiles.filter((managerprofile) => managerprofile.id !== id)
+      );*/
+
+      showToast("Manager profile approved successfully.", "success");
+      fetchManagerProfiles(page);
+    } catch (err) {
+      showToast("Failed to approve manager profile.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deactivateManagerProfile = async (id) => {
+    const confirmDeactivate = window.confirm("Are you sure you want to deactivate this manager profile?");
+    if (!confirmDeactivate) return;
+
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from("manager_profiles")
+        .update({ account_status: "deactivated" })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      /*setManagerProfiles((prevManagerProfiles) =>
+        prevManagerProfiles.filter((managerprofile) => managerprofile.id !== id)
+      );
+      setFilteredManagerProfiles((prevFilteredManagerProfiles) =>
+        prevFilteredManagerProfiles.filter((managerprofile) => managerprofile.id !== id)
+      );*/
+
+      showToast("Manager profile deactivated successfully.", "success");
+      fetchManagerProfiles(page);
+    } catch (err) {
+      showToast("Failed to deactivate manager profile.", "error");
     } finally {
       setLoading(false);
     }
@@ -166,6 +226,19 @@ const Managers = () => {
                   <td className='normal-column'>{managerprofile.email}</td>
                   <td className='normal-column'>{managerprofile.created_at}</td>
                   <td className='action-column'>
+                    {managerprofile.account_status === 'approved' ? (
+                      <FaTimes
+                        onClick={() => deactivateManagerProfile(managerprofile.id)}
+                        title='Deactive'
+                        className='delete-button'
+                      />
+                    ) : (
+                      <FaCheck
+                        onClick={() => approveManagerProfile(managerprofile.id)}
+                        title='Activate'
+                        className='approve-button'
+                      />
+                    )}
                     <FaEye
                       onClick={() => navigate(`/admin/managers/view/${managerprofile.id}`)}
                       title='View'
