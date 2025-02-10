@@ -102,6 +102,11 @@ import CreateFooterMenu from './containers/Admin/Footer_Menu/CreateFooterMenu';
 import EditFooterMenu from './containers/Admin/Footer_Menu/EditFooterMenu';
 import CreateSubFooterMenu from './containers/Admin/Footer_Menu/CreateSubFooterMenu';
 
+import Packages from './containers/Admin/Packages/index.jsx';
+import CreatePackage from './containers/Admin/Packages/CreatePackage.jsx';
+import ViewPackage from './containers/Admin/Packages/ViewPackage.jsx';
+import EditPackage from './containers/Admin/Packages/EditPackage.jsx';
+
 const App = () => {
     const { userRole } = useAuth();
     const [loading, setLoading] = useState(false);
@@ -689,6 +694,41 @@ const App = () => {
                                 }
                             />
 
+                            <Route
+                                path="/admin/packages"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Packages />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/packages/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreatePackage/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/packages/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewPackage/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/packages/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditPackage/>
+                                    </AdminLayout>
+                                }
+                            />
                         </>
                     )}
 
