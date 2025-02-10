@@ -85,6 +85,11 @@ const adminNavBarItems = [
                 icon: <FaListAlt />,
             },
             {
+                title: "Manage Packages",
+                link: "/admin/packages",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Recommended Tags",
                 link: "/admin/recommendedtags",
                 icon: <FaListAlt />,
