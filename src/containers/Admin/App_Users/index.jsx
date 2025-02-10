@@ -37,20 +37,21 @@ const AppUsers = () => {
       const { data: users, error: usersError } = await supabase
         .from('profiles')
         .select('id, username, unique_id')
+        .neq('role_id', 1)
         .range(start, end);
 
       if (usersError) throw usersError;
 
       // Fetch roles from user_roles
-      const { data: roles, error: rolesError } = await supabase
+      /*const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role_id')
         .eq('role_id', 2);
 
-      if (rolesError) throw rolesError;
+      if (rolesError) throw rolesError;*/
 
       // Merge the data
-      const usersWithRoles = users
+      /*const usersWithRoles = users
         .map(user => {
           // Find the role for this user
           const userRole = roles.find(role => role.user_id === user.id && role.role_id === 2);
@@ -67,11 +68,11 @@ const AppUsers = () => {
             role: 'Client' // role_id === 2 is treated as 'Client'
           };
         })
-        .filter(user => user !== null);
+        .filter(user => user !== null);*/
 
-      setUsers(usersWithRoles);
-      setFilteredUsers(usersWithRoles); // Initialize filtered data
-      setTotalPages(Math.ceil(usersWithRoles.length / limit)); // Calculate total pages
+      setUsers(users);
+      setFilteredUsers(users); // Initialize filtered data
+      setTotalPages(Math.ceil(users.length / limit)); // Calculate total pages
     } catch (error) {
       setError("Failed to fetch app users.");
       console.error(error);
