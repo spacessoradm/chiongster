@@ -11,6 +11,7 @@ import ImageUpload from '../../../components/Input/ImageUpload';
 import CreateNewEvent from '../../../components/Input/ImageUpload/CreateNewEvent';
 import CreateNewPromotion from '../../../components/Input/ImageUpload/CreateNewPromotion';
 import OptionRange from '../../../components/Input/OptionRange';
+import TextArea from "antd/es/input/TextArea";
 
 const EditVenue = () => {
     const navigate = useNavigate();
@@ -36,6 +37,13 @@ const EditVenue = () => {
         similar_place_id: [],
         playability: "",
         minimum_tips: "",
+        saturdayOH: "",
+        sundayOH: "",
+        mondayOH: "",
+        tuesdayOH: "",
+        wednesdayOH: "",
+        thursdayOH: "",
+        fridayOH: "",
         venue_category_id: "",
         pic_path: null,
         event_pic_path: null,
@@ -75,6 +83,13 @@ const EditVenue = () => {
                     similar_place_id: venue.similar_place_id || [],
                     playability: venue.playability,
                     minimum_tips: venue.minimum_tips,
+                    saturdayOH: venue.saturdayOH,
+                    sundayOH: venue.sundayOH,
+                    mondayOH: venue.mondayOH,
+                    tuesdayOH: venue.tuesdayOH,
+                    wednesdayOH: venue.wednesdayOH,
+                    thursdayOH: venue.thursdayOH,
+                    fridayOH: venue.fridayOH,
                     venue_category_id: venue.venue_category_id,
                     pic_path: venue.pic_path,
                     event_pic_path: venue.event_pic_path,
@@ -158,6 +173,13 @@ const EditVenue = () => {
                     similar_place_id: formData.similar_place_id,
                     playability: formData.playability,
                     minimum_tips: formData.minimum_tips,
+                    saturdayOH: formData.saturdayOH,
+                    sundayOH: formData.sundayOH,
+                    mondayOH: formData.mondayOH,
+                    tuesdayOH: formData.tuesdayOH,
+                    wednesdayOH: formData.wednesdayOH,
+                    thursdayOH: formData.thursdayOH,
+                    fridayOH: formData.fridayOH,
                     venue_category_id: formData.venue_category_id,
                     pic_path: formData.pic_path,
                     event_pic_path: formData.event_pic_path,
@@ -381,6 +403,69 @@ const EditVenue = () => {
                             type="text"
                             value={formData.playability}
                             onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Minimum Tips:</label>
+                        <TextArea
+                            className="enhanced-input"
+                            type="text"
+                            value={formData.minimum_tips}
+                            onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="field-container">
+                        <label>Opening Hours:</label>
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Monday"
+                            value={formData.mondayOH}
+                            onChange={(e) => setFormData({ ...formData, mondayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Tuesday"
+                            value={formData.tuesdayOH}
+                            onChange={(e) => setFormData({ ...formData, tuesdayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Wednesday"
+                            value={formData.wednesdayOH}
+                            onChange={(e) => setFormData({ ...formData, wednesdayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Thursday"
+                            value={formData.thursdayOH}
+                            onChange={(e) => setFormData({ ...formData, thursdayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Friday"
+                            value={formData.fridayOH}
+                            onChange={(e) => setFormData({ ...formData, fridayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Saturday"
+                            value={formData.saturdayOH}
+                            onChange={(e) => setFormData({ ...formData, saturdayOH: e.target.value })}
+                        />
+                        <input
+                            className="enhanced-input"
+                            type="text"
+                            placeholder="Sunday"
+                            value={formData.sundayOH}
+                            onChange={(e) => setFormData({ ...formData, sundayOH: e.target.value })}
                         />
                     </div>
 

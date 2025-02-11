@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
 
@@ -13,6 +13,7 @@ const AddPromotion = () => {
         image_path: null,
         venue_id: null,
     });
+    const [promotionsURL, setPromotionsURL] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [previewImages, setPreviewImages] = useState([]);
@@ -23,6 +24,32 @@ const AddPromotion = () => {
         setToastInfo({ visible: true, message, type });
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
     };
+
+    useEffect(() => {
+        const fetchGalleries = async () => {
+            try {
+                const { data: promotionsURL, error: promotionsURLError } = await supabase
+                    .from("images_path")
+                    .select("image_path")
+                    .eq("venue_id", id)
+                    .eq("type", "Promotion")
+                    .single();
+
+                if (promotionsURLError) throw promotionsURLError;
+
+                const parsedImages = promotionsURL?.image_path ? JSON.parse(promotionsURL.image_path) : [];
+
+                if (parsedImages.length > 0){
+                    
+                    setPromotionsURL(parsedImages);
+                }
+            } catch (error) {
+                console.error("Error fetching gallery:", error.message);
+            }
+        };
+
+        fetchGalleries();
+    }, [id]);
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
@@ -39,45 +66,85 @@ const AddPromotion = () => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-
+    
         try {
-
+            let shouldDelete = false;
+    
+            // Check if existing images are present
+            if (promotionsURL.length > 0) {
+                shouldDelete = window.confirm(
+                    "Existing images will be replaced. Click 'OK' to delete existing images before adding new ones, or 'Cancel' to keep them."
+                );
+            }
+    
+            // If the user selects "Yes", delete existing images
+            if (shouldDelete) {
+                for (const imagePath of promotionsURL) {
+                    const { error: deleteError } = await supabase.storage
+                        .from("promotions")
+                        .remove([imagePath]);
+    
+                    if (deleteError) throw deleteError;
+                }
+    
+                // Clear existing images in the database
+                const { error: deleteDBError } = await supabase
+                    .from("images_path")
+                    .delete()
+                    .eq("venue_id", id)
+                    .eq("type", "Promotion");
+    
+                if (deleteDBError) throw deleteDBError;
+            }
+    
+            // Upload new images
             const uploadedImagePaths = [];
-
             if (formData.images && formData.images.length > 0) {
                 for (const image of formData.images) {
                     const { data, error: uploadError } = await supabase.storage
-                        .from('promotions')
+                        .from("promotions")
                         .upload(`${Date.now()}-${image.name}`, image);
-
+    
                     if (uploadError) throw uploadError;
-
+    
                     uploadedImagePaths.push(data.path); // Store uploaded image path
                 }
             }
+    
+            console.log(uploadedImagePaths);
+    
+            // If keeping old images, merge them
+            const finalImagePaths = shouldDelete ? uploadedImagePaths : [...promotionsURL, ...uploadedImagePaths];
+    
+            console.log(finalImagePaths);
+            if (promotionsURL.length > 0 && !shouldDelete) {
+                const { error: updateError } = await supabase
+                    .from("images_path")
+                    .update({ image_path: finalImagePaths }) // Update image_path
+                    .eq("venue_id", id)
+                    .eq("type", "Promotion"); // Update specific record
 
-            setFormData({ ...formData, image_path: uploadedImagePaths });
-        
-            const { error: bannerError } = await supabase
-                .from('images_path')
-                .insert([
-                    {
-                        type: 'Promotion',
-                        venue_id: id,
-                        image_path: uploadedImagePaths,
-                    },
-                ]);
+                if (updateError) throw updateError;
+            } else {
+                const { error: insertError } = await supabase
+                    .from("images_path")
+                    .insert([
+                        {
+                            type: "Promotion",
+                            venue_id: id,
+                            image_path: finalImagePaths,
+                        },
+                    ]);
 
-
-            if (bannerError) throw bannerError;
-
-            showToast('Promotion image added successfully.', 'success')
-
-            // Navigate back to the venue list after successful creation
-            navigate('/admin/venues');
+                    if (insertError) throw insertError;
+            }
+    
+            showToast("Promotion image added successfully.", "success");
+    
+            navigate("/admin/venues");
         } catch (error) {
-            showToast('Failed to add promotion image.', 'error')
-            console.error(error.message)
+            showToast("Failed to add promotion image.", "error");
+            console.error(error.message);
         } finally {
             setLoading(false);
         }
@@ -94,6 +161,22 @@ const AddPromotion = () => {
             
             <form onSubmit={handleSubmit} className="outsider">
                 <div className="insider">
+
+                    <div className="field-container">
+                        <label>Existing Promotion</label>
+                        <div className="flex flex-wrap gap-4 mt-4 w-full max-w-[500px] border p-2">
+                            {promotionsURL.map((image, index) => (
+                                <img
+                                    key={index}
+                                    src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/promotions/${image}`}
+                                    alt={`Promotion ${index + 1}`}
+                                    className="rounded-lg object-cover"
+                                    style={{ width: "150px", height: "150px" }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="field-container">
                         <label>Upload Your Promotion Image here:</label>
                         <input
@@ -108,13 +191,14 @@ const AddPromotion = () => {
                         />
 
                         {/* Image Previews */}
-                        <div className="flex flex-wrap gap-4 mt-4">
+                        <div className="flex flex-wrap gap-4 mt-4 w-full max-w-[500px] border p-2">
                             {previewImages.map((src, index) => (
                                 <img
                                     key={index}
                                     src={src}
                                     alt={`Preview ${index + 1}`}
-                                    className="h-24 w-24 rounded-lg object-cover"
+                                    className="rounded-lg object-cover inline-block"
+                                    style={{ width: "500px", height: "500px" }}
                                 />
                             ))}
                         </div>

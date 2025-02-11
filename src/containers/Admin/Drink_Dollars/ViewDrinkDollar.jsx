@@ -5,7 +5,8 @@ import supabase from "../../../config/supabaseClient";
 import './ViewDrinkDollar.css';   
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
-import Pagination from '../../../components/pagination';
+
+import PlainInput from '../../../components/Input/PlainInput';
 
 const ViewDrinkDollar = () => {
   const { id } = useParams();

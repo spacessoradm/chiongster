@@ -162,7 +162,7 @@ const Notis = () => {
                   <td className='normal-column'>{noti.id}</td>
                   <td className='normal-column'>{noti.notis_name}</td>
                   <td className='normal-column'>{noti.status}</td>
-                  <td className='normal-column'>{noti.created_at}</td>
+                  <td className='normal-column'>{new Date(noti.created_at).toLocaleString()}</td>
                   <td className='action-column'>
                     <FaEye
                       onClick={() => navigate(`/admin/notis/view/${noti.id}`)}

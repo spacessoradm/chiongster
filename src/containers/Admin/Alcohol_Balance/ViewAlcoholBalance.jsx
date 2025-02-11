@@ -46,10 +46,8 @@ const ViewAlcoholBalance = () => {
                 const mergedData = {
                     ...alcohols,
                     venue_name: venues.find((venue) => venue.id === alcohols.venue_id)?.venue_name || "Unknown Venue",
-                    username: users.find((user) => String(user.id) === alcohols.user_id)?.username || "Unknown User"
+                    username: users.find((user) => user.id === alcohols.user_id)?.username || "Unknown User"
                 };
-
-                console.log(mergedData)
 
                 setFormData({
                     alcohol_name: mergedData.alcohol_name,
@@ -60,7 +58,6 @@ const ViewAlcoholBalance = () => {
                     reminder: mergedData.reminder,
                     image_paths: mergedData.image_paths || [],
                 });
-
             } catch (err) {
                 showToast(`Error fetching data: ${err.message}`, 'error');
             }
