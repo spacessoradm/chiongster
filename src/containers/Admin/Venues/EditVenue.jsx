@@ -45,6 +45,7 @@ const EditVenue = () => {
         thursdayOH: "",
         fridayOH: "",
         venue_category_id: "",
+        cat_id: "",
         pic_path: null,
         event_pic_path: null,
         promotion_pic_path: null,
@@ -80,6 +81,7 @@ const EditVenue = () => {
                     recommended_tags_id: venue.recommended || [],
                     language_id: venue.language || [],
                     manager_id: venue.manager_id || [],
+                    cat_id: venue.cat_id || [],
                     similar_place_id: venue.similar_place_id || [],
                     playability: venue.playability,
                     minimum_tips: venue.minimum_tips,
@@ -112,12 +114,11 @@ const EditVenue = () => {
                 }))
             );
 
-            console.log(venueList);
-            console.log(venues);
-
-
             const { data: venuecategories } = await supabase.from("venue_category").select("*");
-            setVenueCategories(venuecategories);
+            setVenueCategories(venuecategories.map((category) => ({
+                value: category.id,
+                label: category.category_name,
+            })));
 
             const { data: recommendedTags, error: recommendedTagsError } =
                 await supabase.from("recommended_tags").select("*").eq("status", 'enabled');
@@ -156,6 +157,7 @@ const EditVenue = () => {
 
     const handleSaveVenue = async () => {
         try {
+            formData.venue_category_id =  Number(formData.cat_id[0]);
             const { error } = await supabase
                 .from("venues")
                 .update({
@@ -170,6 +172,7 @@ const EditVenue = () => {
                     recommended: formData.recommended_tags_id,
                     language: formData.language_id,
                     manager_id: formData.manager_id,
+                    cat_id: formData.cat_id,
                     similar_place_id: formData.similar_place_id,
                     playability: formData.playability,
                     minimum_tips: formData.minimum_tips,
@@ -246,19 +249,21 @@ const EditVenue = () => {
 
                     <div className="field-container">
                         <label>Category:</label>
-                        <select
-                            id="venue_category"
-                            value={formData.venue_category_id}
-                            onChange={(e) => setFormData({ ...formData, venue_category_id: e.target.value })}
+                        <Select
+                            options={venueCategories}
+                            isMulti
+                            value={venueCategories.filter((option) =>
+                                (formData.cat_id || []).includes(option.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                    ...formData,
+                                    cat_id: selectedOptions.map((option) => option.value),
+                                })
+                            }
+                            placeholder="Choose at least one category"
                             className="enhanced-input"
-                        >
-                            <option value="">Select a category</option>
-                            {venueCategories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.category_name}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
 
                     <div className="field-container">
