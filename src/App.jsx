@@ -6,17 +6,12 @@ import ResetPassword from './containers/Authentication/ResetPassword/index';
 import Signup from './containers/Authentication/Registration';
 //import supabase from './config/supabaseClient';
 import ProtectedRoute from './components/ProtectedRoute';
-import { useAuth } from './context/AuthContext';
+import { useAuth, AuthProvider } from './context/AuthContext';
 
 // Client Components
 /*import HorizontalNavbar from './containers/Client/Navigation/HorizontalNavBar';
 import BottomNavBar from './containers/Client/Navigation/BottomNavBar';
-import Dashboard from './containers/Client/Dashboard';
-import Inventory from './containers/Client/Inventory/index.jsx';
-import Notification from './containers/Client/Notification';
-import Scan from './containers/Client/Scan';
-import RecipeNavigation from './containers/Client/Recipe/RecipeNavigation';
-import Profile from './containers/Client/Profile';*/
+import Dashboard from './containers/Client/Dashboard';*/
 
 // Admin Components
 import AdminLayout from './components/AdminLayout';
@@ -106,13 +101,16 @@ import Packages from './containers/Admin/Packages/index.jsx';
 import CreatePackage from './containers/Admin/Packages/CreatePackage.jsx';
 import ViewPackage from './containers/Admin/Packages/ViewPackage.jsx';
 import EditPackage from './containers/Admin/Packages/EditPackage.jsx';
+import { AuthClient } from '@supabase/supabase-js';
 
 const App = () => {
-    const { userRole } = useAuth();
+    //const [userRole, setUserRole] = useState('');
+    const uR = 'admin';
     const [loading, setLoading] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
+        const uR = localStorage.getItem('role');
         const handleResize = () => {
             if (window.innerWidth <= 768) {
                 setIsCollapsed(true);
@@ -135,33 +133,13 @@ const App = () => {
     }
 
     return (
-        <div className={`App ${userRole === "admin" ? (isCollapsed ? "sidebar-collapsed" : "sidebar-expanded") : ""}`}>
+        <div className={`App ${uR === "admin" ? (isCollapsed ? "sidebar-collapsed" : "sidebar-expanded") : ""}`}>
             {/* Conditional Navigation Rendering */}
-            {userRole === "client" ? (
-                <>
-                </>
-            ) : userRole === "admin" ? (
-                <SideNavBar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
-            ) : null}
 
             {/* Main Content */}
-            <main className={userRole === "admin" ? "admin-main-content" : ""}>
+            <main className={uR === "admin" ? "admin-main-content" : ""}>
                 <Routes>
                     {/* Default Route */}
-                    <Route
-                        path="/"
-                        element={
-                            userRole ? (
-                                userRole === "admin" ? (
-                                    <Navigate to="/admin/dashboard" />
-                                ) : (
-                                    <Navigate to="/dashboard" />
-                                )
-                            ) : (
-                                <Navigate to="/login" />
-                            )
-                        }
-                    />
 
                     {/* Authentication Routes */}
                     <Route path="/login" element={<Login />} />
@@ -169,14 +147,8 @@ const App = () => {
                     <Route path="/resetpassword" element={<ResetPassword />} />
                     <Route path="/signup" element={<Signup />} />
 
-                    {/* Client Routes */}
-                    {userRole === "client" && (
-                        <>
-                        </>
-                    )}
-
                     {/* Admin Routes */}
-                    {userRole === "admin" && (
+                    {uR === "admin" && (
                         <>
                             <Route
                                 path="/admin/dashboard"

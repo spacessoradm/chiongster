@@ -9,9 +9,7 @@ createRoot(document.getElementById('root')).render(
   <BrowserRouter basename="/Chiongster">
   {/* <BrowserRouter> */}
     <StrictMode>
-      <AuthProvider>
         <App />
-      </AuthProvider>
     </StrictMode>
   </BrowserRouter>
 )
