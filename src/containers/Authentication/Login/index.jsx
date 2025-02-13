@@ -7,7 +7,7 @@ import Toast from '../../../components/Toast';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { updateUserRole } = useAuth();
+    // { updateUserRole } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -47,48 +47,43 @@ const Login = () => {
             
             const { data: adminProfileData, error: adminProfileError } = await supabase
                 .from('profiles')
-                .select('id')
+                .select('id, role_id')
                 .eq('unique_id', data.user.id)
                 .single();
 
             if (adminProfileError) {
-                console.error('Error fetching admin profile:', adminProfileError);
+                showToast(`Error fetching admin profile: ${adminProfileError.message}`, 'error')
                 throw adminProfileError;
-            }
-
-            const { data: userRoleData, error: roleError } = await supabase
-                .from('user_roles')
-                .select('role_id')
-                .eq('user_id', adminProfileData.id)
-                .single();
-
-            if (roleError) {
-                console.error('Error fetching user_role:', roleError);
-                throw roleError;
             }
 
             const { data: roleData, error: roleNameError } = await supabase
                 .from('roles')
                 .select('role_name')
-                .eq('id', userRoleData.role_id)
+                .eq('id', adminProfileData.role_id)
                 .single();
 
             if (roleNameError) {
-                console.error('Error fetching role_name:', roleNameError);
+                showToast(`Error fetching role_name: ${roleNameError.message}`, 'error')
                 throw roleNameError;
             }
 
-            const roleName = roleData.role_name.trim().toLowerCase();
-            updateUserRole(roleName);
+            const roleName = roleData?.role_name.trim().toLowerCase() || 'Unknown';
+            //updateUserRole(roleName);
+
+            localStorage.setItem('role', roleName);
+            localStorage.setItem('profileId', adminProfileData.id);
+            localStorage.setItem('userName', adminProfileData.username);
+            localStorage.setItem('token', data.session.access_token);
 
             if (roleName === 'admin') {
+                console.log('Im here');
                 navigate('/admin/dashboard');
             } else {
-                throw new Error(`Unknown role: ${roleName}`);
+                showToast(`Unknown role: ${roleName}`, 'error')
             }
 
         } catch (error) {
-            console.error('Error:', error.message);
+            showToast(`Login failed: ${error.message}`, 'error')
         } finally {
             setLoading(false);
         }
