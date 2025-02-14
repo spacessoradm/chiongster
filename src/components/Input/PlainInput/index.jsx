@@ -1,8 +1,8 @@
 import "./index.css";
 
-const PlainInput = ({ label, value, onChange, type = "text", required = false, readOnly = false }) => {
+const PlainInput = ({ label, value, onChange, type = "text", required = false, readOnly = false, hidden = false }) => {
     return (
-        <div className="field-container">
+        <div className="field-container" hidden={hidden}>
             <label>{label}</label>
             <input
                 className="enhanced-input"
