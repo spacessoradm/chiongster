@@ -74,6 +74,8 @@ const EditVenue = () => {
                 setFormData({
                     venue_name: venue.venue_name,
                     address: venue.address,
+                    latitude: venue.latitude,
+                    longitude: venue.longitude,
                     opening_hours: venue.opening_hours,
                     happy_hours: venue.happy_hours,
                     night_hours: venue.night_hours,
@@ -165,8 +167,8 @@ const EditVenue = () => {
                 .update({
                     venue_name: formData.venue_name,
                     address: formData.address,
-                    latitude: formData.latitude,
-                    longitude: formData.longitude,
+                    latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+                    longitude: formData.longitude ? parseFloat(formData.longitude) : null,
                     opening_hours: formData.opening_hours,
                     happy_hours: formData.happy_hours,
                     night_hours: formData.night_hours,
