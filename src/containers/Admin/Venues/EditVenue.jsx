@@ -13,6 +13,8 @@ import CreateNewPromotion from '../../../components/Input/ImageUpload/CreateNewP
 import OptionRange from '../../../components/Input/OptionRange';
 import TextArea from "antd/es/input/TextArea";
 
+const positionKey = import.meta.env.POSITIONSTACK_API_KEY;
+
 const EditVenue = () => {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -74,8 +76,6 @@ const EditVenue = () => {
                 setFormData({
                     venue_name: venue.venue_name,
                     address: venue.address,
-                    latitude: venue.latitude,
-                    longitude: venue.longitude,
                     opening_hours: venue.opening_hours,
                     happy_hours: venue.happy_hours,
                     night_hours: venue.night_hours,
@@ -167,8 +167,8 @@ const EditVenue = () => {
                 .update({
                     venue_name: formData.venue_name,
                     address: formData.address,
-                    latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-                    longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+                    latitude: formData.latitude,
+                    longitude: formData.longitude,
                     opening_hours: formData.opening_hours,
                     happy_hours: formData.happy_hours,
                     night_hours: formData.night_hours,
@@ -223,10 +223,8 @@ const EditVenue = () => {
         }
     };
 
-    const POSITIONSTACK_API_KEY = "8e4eee90305ec9d70dd44401c0d12c7a";
-
     const positionStackGeocoding = async (address) => {
-        const url = `http://api.positionstack.com/v1/forward?access_key=${POSITIONSTACK_API_KEY}&query=${encodeURIComponent(address)}`;
+        const url = `http://api.positionstack.com/v1/forward?access_key=${positionKey}&query=${encodeURIComponent(address)}`;
 
         try {
             const response = await fetch(url);
@@ -245,7 +243,6 @@ const EditVenue = () => {
             return { lat: "", lng: "" };
         }
     };
-
 
     const handleAddressChange = async (e) => {
         const address = e.target.value;
