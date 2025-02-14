@@ -27,6 +27,8 @@ const CreateVenue = () => {
     const [formData, setFormData] = useState({
         venue_name: "",
         address: "",
+        latitude: "",
+        longitude: "",
         opening_hours: "",
         happy_hours: "",
         night_hours: "",
@@ -108,6 +110,8 @@ const CreateVenue = () => {
             .insert({
               venue_name: formData.venue_name,
               address: formData.address,
+              latitude: formData.latitude,
+              longitude: formData.longitude,
               opening_hours: formData.opening_hours,
               happy_hours: formData.happy_hours,
               night_hours: formData.night_hours,
@@ -193,7 +197,7 @@ const CreateVenue = () => {
         }
       };
 
-      const handleSaveVenueRedeemItem = async (venueId, item) => {
+    const handleSaveVenueRedeemItem = async (venueId, item) => {
         try {
             console.log(item);
           if (item.length > 0) {
@@ -211,6 +215,40 @@ const CreateVenue = () => {
         } catch (error) {
             showToast('Error saving venue redeem Item', 'error');
         }
+      };
+
+
+    const POSITIONSTACK_API_KEY = "8e4eee90305ec9d70dd44401c0d12c7a";
+
+    const positionStackGeocoding = async (address) => {
+          const url = `http://api.positionstack.com/v1/forward?access_key=${POSITIONSTACK_API_KEY}&query=${encodeURIComponent(address)}`;
+  
+          try {
+              const response = await fetch(url);
+              const data = await response.json();
+  
+              if (data.data.length > 0) {
+                  return {
+                      lat: data.data[0].latitude,
+                      lng: data.data[0].longitude
+                  };
+              } else {
+                  throw new Error("Address not found");
+              }
+          } catch (error) {
+              console.error("Geocoding Error:", error);
+              return { lat: "", lng: "" };
+          }
+      };
+  
+    const handleAddressChange = async (e) => {
+          const address = e.target.value;
+          setFormData((prev) => ({ ...prev, address }));
+  
+          if (address.trim() !== "") {
+              const { lat, lng } = await positionStackGeocoding(address);
+              setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+          }
       };
 
     const handlePriceChange = (price) => {
@@ -345,9 +383,23 @@ const CreateVenue = () => {
                     <TextArea
                         label="Address:"
                         value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        onChange={handleAddressChange}
                         rows={5} 
                         required
+                    />
+
+                    <PlainInput
+                        label="Latitude:"
+                        value={formData.latitude}
+                        readOnly
+                        hidden
+                    />
+
+                    <PlainInput
+                        label="Longitude:"
+                        value={formData.longitude}
+                        readOnly
+                        hidden
                     />
 
                     <SingleSelect 

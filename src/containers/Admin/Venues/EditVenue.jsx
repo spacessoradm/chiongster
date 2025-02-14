@@ -24,6 +24,8 @@ const EditVenue = () => {
     const [formData, setFormData] = useState({
         venue_name: "",
         address: "",
+        latitude: "",
+        longitude: "",
         opening_hours: "",
         happy_hours: "",
         night_hours: "",
@@ -163,6 +165,8 @@ const EditVenue = () => {
                 .update({
                     venue_name: formData.venue_name,
                     address: formData.address,
+                    latitude: formData.latitude,
+                    longitude: formData.longitude,
                     opening_hours: formData.opening_hours,
                     happy_hours: formData.happy_hours,
                     night_hours: formData.night_hours,
@@ -197,6 +201,57 @@ const EditVenue = () => {
             navigate("/admin/venues");
         } catch (error) {
             showToast("Failed to update venue: " + error.message, "error");
+        }
+    };
+
+    const getLatLngFromAddress = async (address) => {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.length > 0) {
+                return { lat: data[0].lat, lng: data[0].lon };
+            } else {
+                throw new Error("Address not found");
+            }
+        } catch (error) {
+            console.error("Geocoding Error:", error);
+            return { lat: "", lng: "" };
+        }
+    };
+
+    const POSITIONSTACK_API_KEY = "8e4eee90305ec9d70dd44401c0d12c7a";
+
+    const positionStackGeocoding = async (address) => {
+        const url = `http://api.positionstack.com/v1/forward?access_key=${POSITIONSTACK_API_KEY}&query=${encodeURIComponent(address)}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.data.length > 0) {
+                return {
+                    lat: data.data[0].latitude,
+                    lng: data.data[0].longitude
+                };
+            } else {
+                throw new Error("Address not found");
+            }
+        } catch (error) {
+            console.error("Geocoding Error:", error);
+            return { lat: "", lng: "" };
+        }
+    };
+
+
+    const handleAddressChange = async (e) => {
+        const address = e.target.value;
+        setFormData((prev) => ({ ...prev, address }));
+
+        if (address.trim() !== "") {
+            const { lat, lng } = await positionStackGeocoding(address);
+            setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
         }
     };
 
@@ -243,7 +298,25 @@ const EditVenue = () => {
                         <textarea
                             className="enhanced-input"
                             value={formData.address}
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            onChange={handleAddressChange}
+                        />
+                    </div>
+
+                    <div className="field-container" hidden>
+                        <label>Latitude:</label>
+                        <textarea
+                            className="enhanced-input"
+                            value={formData.latitude}
+                            readOnly
+                        />
+                    </div>
+
+                    <div className="field-container" hidden>
+                        <label>Longitude:</label>
+                        <textarea
+                            className="enhanced-input"
+                            value={formData.longitude}
+                            readOnly
                         />
                     </div>
 
