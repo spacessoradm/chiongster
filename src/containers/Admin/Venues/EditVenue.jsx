@@ -244,13 +244,44 @@ const EditVenue = () => {
         }
     };
 
+    const getCoordinates = async (address) => {
+        const apiKey = import.meta.env.VITE_OPENCAGE_API_KEY; // Secure API key in .env
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${apiKey}`;
+    
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          console.log(data);
+          
+          if (data.results.length > 0) {
+            const lat = data.results[0].geometry.lat;
+            const lng = data.results[0].geometry.lng;
+            console.log(lat, lng);  
+            return { latitude: lat, longitude: lng };
+          } else {
+            console.error("No results found for the address.");
+            return null;
+          }
+        } catch (error) {
+          console.error("Geocoding error:", error);
+          return null;
+        }
+      };
+
+    
     const handleAddressChange = async (e) => {
         const address = e.target.value;
         setFormData((prev) => ({ ...prev, address }));
 
         if (address.trim() !== "") {
-            const { lat, lng } = await positionStackGeocoding(address);
-            setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+            const coordinates = await getCoordinates(address);
+            if (coordinates) {
+                setFormData((prev) => ({
+                    ...prev,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                }));
+            }
         }
     };
 
