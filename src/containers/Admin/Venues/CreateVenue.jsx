@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
 import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
 
-import "./CreateVenue.css";
+import "./index.css";
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 import ImageUpload from '../../../components/Input/ImageUpload';
@@ -14,6 +14,7 @@ import PlainInput from '../../../components/Input/PlainInput';
 import TextArea from '../../../components/Input/TextArea';
 import SingleSelect from '../../../components/Input/SingleSelect';
 import MultiSelect from '../../../components/Input/MultiSelect';
+import Select from "react-select";
 
 const CreateVenue = () => {
     const navigate = useNavigate();
@@ -29,6 +30,7 @@ const CreateVenue = () => {
         address: "",
         latitude: "",
         longitude: "",
+        cat_id: "",
         opening_hours: "",
         happy_hours: "",
         night_hours: "",
@@ -104,7 +106,8 @@ const CreateVenue = () => {
     
     const handleSaveVenue = async () => {
         try {
-            console.log(formData);
+          console.log(formData);
+          formData.venue_category_id =  Number(formData.cat_id[0]);
           const { data: venueData, error } = await supabase
             .from("venues")
             .insert({
@@ -112,6 +115,7 @@ const CreateVenue = () => {
               address: formData.address,
               latitude: formData.latitude,
               longitude: formData.longitude,
+              cat_id: formData.cat_id || null,
               opening_hours: formData.opening_hours,
               happy_hours: formData.happy_hours,
               night_hours: formData.night_hours,
@@ -124,7 +128,7 @@ const CreateVenue = () => {
               similar_place_id: formData.similar_place_id || null,
               playability: formData.playability,
               minimum_tips: formData.minimum_tips,
-              venue_category_id: selectedCategory || null,
+              venue_category_id: formData.venue_category_id,
               pic_path: formData.pic_path,
               event_pic_path: formData.event_pic_path,
               promotion_pic_path: formData.promotion_pic_path,
@@ -409,13 +413,24 @@ const CreateVenue = () => {
                         hidden
                     />
 
-                    <SingleSelect 
-                        label="Category" 
-                        options={venueCategories} 
-                        selectedValue={selectedCategory} 
-                        onChange={setSelectedCategory} 
-                        placeholder="Choose a category"
-                   />
+                    <div className="field-container">
+                        <label>Category:</label>
+                        <Select
+                            options={venueCategories}
+                            isMulti
+                            value={venueCategories.filter((option) =>
+                                (formData.cat_id || []).includes(option.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                    ...formData,
+                                    cat_id: selectedOptions.map((option) => option.value),
+                                })
+                            }
+                            placeholder="Choose at least one category"
+                            className="enhanced-input"
+                        />
+                    </div>
 
                     <PlainInput
                         label="Happy Hours:"
@@ -724,15 +739,7 @@ const CreateVenue = () => {
 
             <button
                 onClick={handleSaveVenue}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "25px",
-                    width: "20%",
-                }}
+                className="save-button"
             >
                 Save
             </button>
