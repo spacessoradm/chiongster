@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
+
 import './index.css';
 import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
 import SearchBar from '../../../components/SearchBarSection';
@@ -41,34 +42,6 @@ const AppUsers = () => {
         .range(start, end);
 
       if (usersError) throw usersError;
-
-      // Fetch roles from user_roles
-      /*const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role_id')
-        .eq('role_id', 2);
-
-      if (rolesError) throw rolesError;*/
-
-      // Merge the data
-      /*const usersWithRoles = users
-        .map(user => {
-          // Find the role for this user
-          const userRole = roles.find(role => role.user_id === user.id && role.role_id === 2);
-
-          // Only include users with role_id === 2
-          if (!userRole) {
-            return null; // Exclude this user if no matching role is found
-          }
-
-          return {
-            id: user.id,
-            username: user.username,
-            unique_id: user.unique_id,
-            role: 'Client' // role_id === 2 is treated as 'Client'
-          };
-        })
-        .filter(user => user !== null);*/
 
       setUsers(users);
       setFilteredUsers(users); // Initialize filtered data
@@ -173,7 +146,7 @@ const AppUsers = () => {
       )}
 
       {/* Display users */}
-      {!loading && !error && filteredUsers.length > 0 ? (
+      {!loading && filteredUsers.length > 0 ? (
         <>
           <table className='table-container'>
             <thead>
@@ -212,7 +185,7 @@ const AppUsers = () => {
                       className='edit-button'
                     />
                     <FaTrashAlt 
-                      onClick={() => deleteItem(user.id)}
+                      onClick={() => deleteUser(user.id)}
                       title='Delete'
                       className='delete-button'
                     />

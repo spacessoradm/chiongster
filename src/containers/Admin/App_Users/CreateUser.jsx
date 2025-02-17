@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../../config/supabaseClient';
-import './CreateUser.css';
+import './index.css';
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 

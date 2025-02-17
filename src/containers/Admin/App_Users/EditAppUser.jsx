@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
-import './EditAppUser.css';
+import './index.css';
+import BackButton from "../../../components/Button/BackArrowButton";
+import Toast from '../../../components/Toast';
+import PlainInput from '../../../components/Input/PlainInput';
 
 const EditAppUser = () => {
     const { id } = useParams();
-    const [unqID, setUnqID] = useState("");
-    const [userName, setUserName] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
-    const [selectedRoleId, setSelectedRoleId] = useState(null);
-    const [roleName, setRoleName] = useState("");
-    const [picture, setPicture] = useState(null);
-    const [currentPicturePath, setCurrentPicturePath] = useState("");
-    const [roles, setRoles] = useState([]);
     const navigate = useNavigate();
+    const [currentPicturePath, setCurrentPicturePath] = useState("");
+    const [picture, setPicture] = useState(null);
+    const [user, setUser] = useState({
+        unqID: "",
+        userName: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        email: "",
+        plan_id: "",
+        plan_expired_date: null,
+        referral_code: "",
+        roleName: "",
+        picture: null
+    });
+    const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
+    const showToast = (message, type) => {
+        setToastInfo({ visible: true, message, type });
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+    };
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -29,44 +41,23 @@ const EditAppUser = () => {
 
                 if (userError) throw userError;
 
-                setUnqID(user.user);
-                setUserName(user.username);
-                setFirstName(user.first_name);
-                setLastName(user.last_name);
-                setPhone(user.phone);
-                setEmail(user.email);
-                setCurrentPicturePath(user.pic_path);
-
-                const { data: userRole, error: userRoleError } = await supabase
-                    .from("user_roles")
-                    .select("role_id")
-                    .eq("user_id", user.user)
-                    .single();
-
-                if (userRoleError) throw userRoleError;
-
-                const { data: roleData, error: roleError } = await supabase
-                    .from("roles")
-                    .select("id, role_name")
-                    .eq("id", userRole.role_id)
-                    .single();
-
-                if (roleError) throw roleError;
-
-                setSelectedRoleId(roleData.id);
-                setRoleName(roleData.role_name);
-
-                const { data: rolesData, error: rolesError } = await supabase
-                    .from("roles")
-                    .select("id, role_name");
-
-                if (rolesError) {
-                    console.error("Error fetching roles data:", rolesError);
-                } else {
-                    setRoles(rolesData || []);
+                if (user) {
+                    setUser(prevUser => ({
+                        ...prevUser,
+                        userName: user?.username || "",
+                        firstName: user?.first_name || "",
+                        lastName: user?.last_name || "",
+                        phone: user?.phone || "",
+                        email: user?.email || "",
+                        plan_id: user?.plan_id || "",
+                        plan_expired_date: user?.plan_expired_date || null,
+                        referral_code: user?.referral_code || "",
+                    }));
                 }
 
-                const { data: notificationData, error: notificationError } = await supabase
+                setCurrentPicturePath(user.pic_path);
+
+                /*const { data: notificationData, error: notificationError } = await supabase
                     .from("notification_day")
                     .select("id, day");
 
@@ -74,7 +65,8 @@ const EditAppUser = () => {
                     console.error("Error fetching notification days:", notificationError);
                 } else {
                     setNotificationDay(notificationData || []);
-                }
+                }*/
+
             } catch (error) {
                 console.error("Error fetching user data:", error.message);
             }
@@ -89,11 +81,6 @@ const EditAppUser = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!userName) {
-            alert("Please fill all required fields.");
-            return;
-        }
 
         try {
             let picturePath = currentPicturePath;
@@ -111,25 +98,16 @@ const EditAppUser = () => {
             const { error: updateError } = await supabase
                 .from("profiles")
                 .update({
-                    username: userName,
-                    first_name: firstName,
-                    last_name: lastName,
-                    phone: phone,
-                    email: email,
+                    username: user.userName,
+                    first_name: user.firstName,
+                    last_name: user.lastName,
+                    phone: user.phone,
+                    email: user.email,
                     pic_path: picturePath,
                 })
                 .eq("id", id);
 
             if (updateError) throw updateError;
-
-            if (selectedRoleId) {
-                const { error: userRoleError } = await supabase
-                    .from("user_roles")
-                    .update({ role_id: selectedRoleId })
-                    .eq("user_id", unqID);
-
-                if (userRoleError) throw userRoleError;
-            }
 
             alert("User updated successfully!");
             navigate("/admin/appusers");
@@ -140,81 +118,98 @@ const EditAppUser = () => {
     };
 
     return (
-        <div className="edit-user-container">
-            <div className="admin-content">
-                <h2>Edit App User</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>User Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
+        <div className="edit-user-container" style={{ fontFamily: "Courier New" }}>
+            <BackButton to="/admin/appusers" />
+            <h2>Edit App User</h2>
+
+            {toastInfo.visible && (
+                <Toast message={toastInfo.message} type={toastInfo.type} />
+            )}
+                
+                <form className="outsider" onSubmit={handleSubmit}>
+                    <div className="insider">
+
+                        <PlainInput
+                            label="User Name:"
+                            value={user.userName}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                userName: e.target.value
+                            }))}
                             required
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label>First Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            required
+                        <PlainInput
+                            label="First Name:"
+                            value={user.firstName}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                firstName: e.target.value
+                            }))}
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label>Last Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            required
+                        <PlainInput
+                            label="Last Name:"
+                            value={user.lastName}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                lastName: e.target.value
+                            }))}
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label>Email:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
+                        <PlainInput
+                            label="Email:"
+                            value={user.email}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                email: e.target.value
+                            }))}
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label>Phone:</label>
-                        <input
-                        c   className="enhanced-input"
-                            type="text"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
+                        <PlainInput
+                            label="Phone No.:"
+                            value={user.phone}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                phone: e.target.value
+                            }))}
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label>Profile Picture:</label>
-                        {currentPicturePath && (
-                            <img
-                                src={`${supabase.storage.from("profile_picture").getPublicUrl(currentPicturePath).publicURL}`}
-                                alt="Current Picture"
-                                className="current-picture"
-                            />
-                        )}
-                        <label>New Picture (optional):</label>
-                        <input type="file" accept="image/*" onChange={handlePictureChange} />
-                    </div>
+                        
+                        <PlainInput
+                            label="Plan Expired Date:"
+                            format="date"
+                            value={user.plan_expired_date 
+                                ? new Date(user.plan_expired_date).toISOString().slice(0, 16).replace("T", " ") 
+                                : ""}
+                            onChange={(e) => setUser(prevUser => ({
+                                ...prevUser,
+                                plan_expired_date: e.target.value
+                            }))}
+                        />
 
-                    <button type="submit" className="submit-btn">Update User</button>
+                        <PlainInput
+                            label="Referral Code:"
+                            value={user.referral_code}
+                            readOnly
+                        />
+
+                        <div className="form-group">
+                            <label>Profile Picture:</label>
+                            {currentPicturePath && (
+                                <img
+                                    src={`${supabase.storage.from("profile_picture").getPublicUrl(currentPicturePath).publicURL}`}
+                                    alt="Current Picture"
+                                    className="current-picture"
+                                />
+                            )}
+                            <label>New Picture (optional):</label>
+                            <input type="file" accept="image/*" onChange={handlePictureChange} />
+                        </div>
+
+                        <button type="submit" className="submit-btn">Update User</button>
+                    </div>
                 </form>
-            </div>
         </div>
     );
 };
