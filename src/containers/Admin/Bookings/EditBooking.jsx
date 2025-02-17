@@ -7,6 +7,7 @@ import { FaEdit, } from "react-icons/fa";
 import Toast from '../../../components/Toast';
 import BackButton from '../../../components/Button/BackArrowButton';
 import ReceiptUploader from '../../../components/Input/ImageUpload/ReceiptUploader';
+import PlainInput from '../../../components/Input/PlainInput';
 
 const EditBooking = () => {
     const navigate = useNavigate();
@@ -24,9 +25,6 @@ const EditBooking = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-
-    const [showModal, setShowModal] = useState(false);
-    const [message, setMessage] = useState("");
 
     // Fetch venues, users, and existing booking data
     useEffect(() => {

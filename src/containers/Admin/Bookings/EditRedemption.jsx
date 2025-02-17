@@ -50,14 +50,14 @@ const EditRedemption = () => {
                     .eq("booking_id", id);
 
                 if (redemptionList.length > 0) {
-                    setFormData({
+                    setFormData((prevData) => ({
+                        ...prevData,
                         redeemItem: redemptionList.map((item) => ({
                             item_id: item.item_name,
                             quantity: item.quantity,
                             amount: item.amount,
                         })),
-                    });
-                    console.log(formData);
+                    }));
                 }
     
             } catch (error) {
@@ -145,7 +145,7 @@ const EditRedemption = () => {
                         >
                             <option value="">Select an item</option>
                             {items.map((item) => (
-                                <option key={item.value} value={item.value}>
+                                <option key={item.value} value={String(item.value)}>
                                     {item.label}
                                 </option>
                             ))}
