@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
 
-import "./EditDamage.css";
+import "./index.css";
+import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 
@@ -192,50 +193,31 @@ const EditDamage = () => {
                             className="enhanced-input"
                         />
 
-                        <button
+                        <FaMinusCircle
+                            size={50}  
                             onClick={() => removeDamageGroup(index)}
                             style={{
-                                background: "#f44336",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                padding: "5px 10px",
-                                cursor: "pointer",
-                                marginTop: "10px",
-                                width: "15%",
+                            cursor: "pointer",
+                            color: "#f44336",
+                            margin: "15px",
                             }}
-                        >
-                            Remove Group
-                        </button>
+                        />
                     </div>
                 ))}
-                <button
+                <FaPlusCircle
+                    size={50}  
                     onClick={addDamageGroup}
                     style={{
-                        marginTop: "10px",
-                        padding: "10px 20px",
-                        backgroundColor: "#4CAF50",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
                         cursor: "pointer",
-                        width: "25%",
-                    }}
-                >
-                    + Add Damage Group
-                </button>
+                        color: "#4CAF50",
+                        margin: "15px",
+                        }}
+                />
             </div>
 
             <button
                 onClick={handleSaveVenueDamage}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                }}
+                className="save-button"
             >
                 Save
             </button>

@@ -4,7 +4,7 @@ import Select from "react-select";
 import supabase from "../../../config/supabaseClient";
 import { FaEdit, } from "react-icons/fa";
 
-import "./EditVenue.css";
+import "./index.css";
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 import ImageUpload from '../../../components/Input/ImageUpload';
@@ -13,7 +13,8 @@ import CreateNewPromotion from '../../../components/Input/ImageUpload/CreateNewP
 import OptionRange from '../../../components/Input/OptionRange';
 import TextArea from "antd/es/input/TextArea";
 
-const positionKey = import.meta.env.POSITIONSTACK_API_KEY;
+import PlainInput from '../../../components/Input/PlainInput';
+import TextAreaInput from '../../../components/Input/TextArea';
 
 const EditVenue = () => {
     const navigate = useNavigate();
@@ -40,7 +41,9 @@ const EditVenue = () => {
         manager_id: [],
         similar_place_id: [],
         playability: "",
+        discount_percentage: "",
         minimum_tips: "",
+        vibe: [],
         saturdayOH: "",
         sundayOH: "",
         mondayOH: "",
@@ -60,6 +63,13 @@ const EditVenue = () => {
         setToastInfo({ visible: true, message, type });
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000);
     };
+
+    const vibeList = [
+        { value: "HP", label: "Happy Hours" },
+        { value: "LN", label: "Ladies Night" },
+        { value: "CC", label: "Classy Chill" },
+        { value: "EM", label: "Exclusive for Men" },
+    ];
 
     // Fetch venue data and dropdown data
     useEffect(() => {
@@ -88,7 +98,9 @@ const EditVenue = () => {
                     cat_id: venue.cat_id || [],
                     similar_place_id: venue.similar_place_id || [],
                     playability: venue.playability,
+                    discount_percentage: venue.discount_percentage,
                     minimum_tips: venue.minimum_tips,
+                    vibe: venue.vibe || [],
                     saturdayOH: venue.saturdayOH,
                     sundayOH: venue.sundayOH,
                     mondayOH: venue.mondayOH,
@@ -181,7 +193,9 @@ const EditVenue = () => {
                     cat_id: formData.cat_id,
                     similar_place_id: formData.similar_place_id,
                     playability: formData.playability,
+                    discount_percentage: formData.discount_percentage,
                     minimum_tips: formData.minimum_tips,
+                    vibe: formData.vibe,
                     saturdayOH: formData.saturdayOH,
                     sundayOH: formData.sundayOH,
                     mondayOH: formData.mondayOH,
@@ -203,44 +217,6 @@ const EditVenue = () => {
             navigate("/admin/venues");
         } catch (error) {
             showToast("Failed to update venue: " + error.message, "error");
-        }
-    };
-
-    const getLatLngFromAddress = async (address) => {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.length > 0) {
-                return { lat: data[0].lat, lng: data[0].lon };
-            } else {
-                throw new Error("Address not found");
-            }
-        } catch (error) {
-            console.error("Geocoding Error:", error);
-            return { lat: "", lng: "" };
-        }
-    };
-
-    const positionStackGeocoding = async (address) => {
-        const url = `http://api.positionstack.com/v1/forward?access_key=${positionKey}&query=${encodeURIComponent(address)}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.data.length > 0) {
-                return {
-                    lat: data.data[0].latitude,
-                    lng: data.data[0].longitude
-                };
-            } else {
-                throw new Error("Address not found");
-            }
-        } catch (error) {
-            console.error("Geocoding Error:", error);
-            return { lat: "", lng: "" };
         }
     };
 
@@ -267,8 +243,7 @@ const EditVenue = () => {
           return null;
         }
       };
-
-    
+   
     const handleAddressChange = async (e) => {
         const address = e.target.value;
         setFormData((prev) => ({ ...prev, address }));
@@ -312,43 +287,33 @@ const EditVenue = () => {
 
             <div className="outsider">
                 <div className="insider">
-                    <div className="field-container">
-                        <label>Venue Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.venue_name}
-                            onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
-                            required
-                        />
-                    </div>
+                    <PlainInput
+                        label="Venue Name"
+                        value={formData.venue_name}
+                        onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                        required
+                    />
 
-                    <div className="field-container">
-                        <label>Address:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.address}
-                            onChange={handleAddressChange}
-                        />
-                    </div>
+                    <TextAreaInput
+                        label="Address"
+                        value={formData.address}
+                        onChange={handleAddressChange}
+                        required
+                    />
 
-                    <div className="field-container" hidden>
-                        <label>Latitude:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.latitude}
-                            readOnly
-                        />
-                    </div>
+                    <PlainInput
+                        label="Latitude"
+                        value={formData.latitude}
+                        readOnly
+                        hidden
+                    />
 
-                    <div className="field-container" hidden>
-                        <label>Longitude:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.longitude}
-                            readOnly
-                        />
-                    </div>
+                    <PlainInput
+                        label="Longitude"
+                        value={formData.longitude}
+                        readOnly
+                        hidden
+                    />
 
                     <div className="field-container">
                         <label>Category:</label>
@@ -369,44 +334,29 @@ const EditVenue = () => {
                         />
                     </div>
 
-                    <div className="field-container">
-                        <label>Happy Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.happy_hours}
-                            onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Happy Hours"
+                        value={formData.happy_hours}
+                        onChange={(e) => setFormData({ ...formData, happy_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <label>Night Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.night_hours}
-                            onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Night Hours"
+                        value={formData.night_hours}
+                        onChange={(e) => setFormData({ ...formData, night_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <label>Morning Hours:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.morning_hours}
-                            onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Morning Hours"
+                        value={formData.morning_hours}
+                        onChange={(e) => setFormData({ ...formData, morning_hours: e.target.value })}
+                    />
 
-                    <div className="field-container">
-                        <label>Opening Hours:</label>
-                        <textarea
-                            className="enhanced-input"
-                            value={formData.opening_hours}
-                            onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
-                        />
-                    </div>
+                    <TextAreaInput
+                        label="Opening Hours"
+                        value={formData.opening_hours}
+                        onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
+                    />
 
                     <div className="field-container">
                         <OptionRange
@@ -418,15 +368,11 @@ const EditVenue = () => {
                         <p>Selected Price Level: {formData.price}</p>
                     </div>
 
-                    <div className="field-container">
-                        <label>Drink Min Spend:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.drink_min_spend}
-                            onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Drink Min Spend"
+                        value={formData.drink_min_spend}
+                        onChange={(e) => setFormData({ ...formData, drink_min_spend: e.target.value })}
+                    />
 
                     <div className="field-container">
                         <label>Recommended Tags:</label>
@@ -504,23 +450,40 @@ const EditVenue = () => {
                         />
                     </div>
 
-                    <div className="field-container">
-                        <label>Playability:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={formData.playability}
-                            onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
-                        />
-                    </div>
+                    <PlainInput
+                        label="Playability"
+                        value={formData.playability}
+                        onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
+                    />
+
+                    <PlainInput
+                        label="Discount (% Drink Dollar)"
+                        value={formData.discount_percentage}
+                        onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
+                    />
+
+                    <TextAreaInput
+                        label="Minimum Tips"
+                        value={formData.minimum_tips}
+                        onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
+                    />
 
                     <div className="field-container">
-                        <label>Minimum Tips:</label>
-                        <TextArea
+                        <label>Vibe:</label>
+                        <Select
+                            options={vibeList}
+                            isMulti
+                            value={vibeList.filter((option) =>
+                                (formData.vibe || []).includes(option.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                                setFormData({
+                                    ...formData,
+                                    vibe: selectedOptions.map((option) => option.value),
+                                })
+                            }
+                            placeholder="Enable the vibe list here"
                             className="enhanced-input"
-                            type="text"
-                            value={formData.minimum_tips}
-                            onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
                         />
                     </div>
 
@@ -600,7 +563,6 @@ const EditVenue = () => {
                         )}
                         <CreateNewEvent onUpload={handleEventImageUpload} />
                     </div>
-
                     <div className="field-container">
                         <label>Edit Venue Damage:</label>
                         <FaEdit 
@@ -630,16 +592,9 @@ const EditVenue = () => {
 
             <button
                 onClick={handleSaveVenue}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                }}
+                className='save-button'
             >
-                Save Changes
+                Save
             </button>
         </div>
     );

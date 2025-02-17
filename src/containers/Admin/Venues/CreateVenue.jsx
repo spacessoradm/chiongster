@@ -42,6 +42,7 @@ const CreateVenue = () => {
         manager_id: "",
         similar_place_id: "",
         playability: "",
+        discount_percentage: "",
         minimum_tips: "",
         venue_category_id: "",
         damage: [
@@ -127,6 +128,7 @@ const CreateVenue = () => {
               manager_id: formData.manager_id || null,
               similar_place_id: formData.similar_place_id || null,
               playability: formData.playability,
+              discount_percentage: formData.discount_percentage,
               minimum_tips: formData.minimum_tips,
               venue_category_id: formData.venue_category_id,
               pic_path: formData.pic_path,
@@ -507,6 +509,18 @@ const CreateVenue = () => {
                         label="Playability:"
                         value={formData.playability}
                         onChange={(e) => setFormData({ ...formData, playability: e.target.value })}
+                    />
+
+                    <PlainInput
+                        label="Discount (% Drink Dollar):"
+                        value={formData.discount_percentage}
+                        onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
+                    />
+
+                    <PlainInput
+                        label="Minimum Tips:"
+                        value={formData.minimum_tips}
+                        onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
                     />
 
                     <ImageUpload onUpload={handleImageUpload} />
