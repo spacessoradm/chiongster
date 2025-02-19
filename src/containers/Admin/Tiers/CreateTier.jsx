@@ -7,16 +7,14 @@ import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 import PlainInput from '../../../components/Input/PlainInput';
 
-const CreatePackage = () => {
+const CreateTier = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        package_name: '',
-        price: '',
-        billing_cycle: '',
-        annual_billing: '',
+        name: '',
+        description: '',
+        color_code: '',
         status: 'enabled',
     });
-    const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
 
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
@@ -25,14 +23,6 @@ const CreatePackage = () => {
         setToastInfo({ visible: true, message, type });
         setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
     };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-          ...prevState,
-          [name]: value
-        }));
-      };
 
     const handleStatusChange = async (newStatus) => {
         setFormData(prevState => ({
@@ -47,25 +37,25 @@ const CreatePackage = () => {
         setLoading(true);
 
         try {
-            const { error: packageError } = await supabase
-                .from('packages')
+            const { error } = await supabase
+                .from('tiers')
                 .insert([
                     {
-                        package_name: formData.package_name,
-                        price: formData.price,
-                        billing_cycle: formData.billing_cycle,
-                        annual_billing: formData.annual_billing,
+                        name: formData.name,
+                        description: formData.description,
+                        color_code: formData.color_code,
                         status: formData.status,
                     },
                 ]);
 
-            if (packageError) throw packageError;
+            if (error) {
+                showToast('Failed to create tier.', 'error')
+                throw error;
+            } 
 
-            showToast('Package created successfully.', 'success')
-
-            navigate('/admin/packages');
+            navigate('/admin/tiers');
         } catch (error) {
-            showToast('Failed to create package.', 'error')
+            showToast('Failed to create tier.', 'error')
         } finally {
             setLoading(false);
         }
@@ -73,8 +63,8 @@ const CreatePackage = () => {
 
     return (
         <div style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/packages" />   
-            <h2>Create New Package</h2> 
+            <BackButton to="/admin/tiers" />   
+            <h2>Create New Tier</h2> 
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -84,32 +74,24 @@ const CreatePackage = () => {
                 <div className="insider">
 
                     <PlainInput
-                        label="Package Name:"
-                        value={formData.package_name}
-                        onChange={(e) => setFormData({ ...formData, package_name: e.target.value })}
+                        label="Name:"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                     />   
 
                     <PlainInput
-                        label="Price:"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
+                        label="Description:"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     /> 
 
                     <PlainInput
-                        label="Billing Cycle:"
-                        value={formData.billing_cycle}
-                        onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value })}
-                        
-                    />         
-
-                    <PlainInput
-                        label="Annual Billing:"
-                        value={formData.annual_billing}
-                        onChange={(e) => setFormData({ ...formData, annual_billing: e.target.value })}
-                        
-                    />   
+                        label="Color Code:"
+                        value={formData.color_code}
+                        onChange={(e) => setFormData({ ...formData, color_code: e.target.value })}
+                        required
+                    />     
 
                     <div className="field-container">
                         <label>Status:</label>
@@ -154,4 +136,4 @@ const CreatePackage = () => {
     );
 };
 
-export default CreatePackage;
+export default CreateTier;

@@ -1,9 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import supabase from '../../../config/supabaseClient';
-import './ViewVenueCategory.css';   
+import './index.css';   
 import BackButton from "../../../components/Button/BackArrowButton";
 import Toast from '../../../components/Toast';
+
+import PlainInput from '../../../components/Input/PlainInput';
+import TextArea from '../../../components/Input/TextArea';
 
 const ViewVenueCategory = () => {
     const { id } = useParams();
@@ -81,33 +84,11 @@ const ViewVenueCategory = () => {
 
             <form className="outsider">
                 <div className="insider">
-                    <div className="field-container">
-                        <label>Venue Name:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={venueCategory.category_name}
-                            disabled={isDisabled}
-                        />
-                    </div>
-                    <div className="field-container">
-                        <label>Venue Description:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={venueCategory.description}
-                            disabled={isDisabled}
-                        />
-                    </div>
-                    <div className="field-container">
-                        <label>Created At:</label>
-                        <input
-                            className="enhanced-input"
-                            type="text"
-                            value={venueCategory.created_at}
-                            disabled={isDisabled}
-                        />
-                    </div>
+
+                    <PlainInput label="Venue Name" value={venueCategory.category_name} readOnly />
+                    <TextArea label="Venue Description" value={venueCategory.description} readOnly />
+                    <PlainInput label="Sequence in Menu" value={venueCategory.seq_in_menu} readOnly />
+                    <PlainInput label="Created At" value={venueCategory.created_at} readOnly />
 
                 </div>
                 </form>

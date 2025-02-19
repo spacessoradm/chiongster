@@ -90,6 +90,11 @@ const adminNavBarItems = [
                 icon: <FaListAlt />,
             },
             {
+                title: "Manage Tiers",
+                link: "/admin/tiers",
+                icon: <FaListAlt />,
+            },
+            {
                 title: "Manage Recommended Tags",
                 link: "/admin/recommendedtags",
                 icon: <FaListAlt />,
@@ -100,8 +105,13 @@ const adminNavBarItems = [
                 icon: <FaListAlt />,
             },
             {
-                title: "Manage Venue",
+                title: "Manage Venue Category",
                 link: "/admin/venuecategory",
+                icon: <FaListAlt />,
+            },
+            {
+                title: "Manage Vibe",
+                link: "/admin/vibe",
                 icon: <FaListAlt />,
             },
         ]

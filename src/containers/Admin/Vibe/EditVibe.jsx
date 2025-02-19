@@ -8,10 +8,9 @@ import Toast from '../../../components/Toast';
 import PlainInput from '../../../components/Input/PlainInput';
 import TextArea from '../../../components/Input/TextArea';
 
-
-const EditVenueCategory = () => {
+const EditVibe = () => {
     const { id } = useParams();
-    const [venueCategory, setVenueCategory] = useState("");
+    const [vibe, setVibe] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [seqInMenu, setSeqInMenu] = useState("");
@@ -24,27 +23,27 @@ const EditVenueCategory = () => {
     };
 
     useEffect(() => {
-        const fetchVenueCategoryData = async () => {
+        const fetchVibeData = async () => {
             try {
-                // Fetch venue category data from the database
-                const { data: venueCategoryData, error: venueCategoryError } = await supabase
-                    .from("venue_category")
+                // Fetch vibe data from the database
+                const { data: vibeData, error: vibeError } = await supabase
+                    .from("vibe")
                     .select("*")
                     .eq("id", id)
                     .single();
 
-                if (venueCategoryError) throw venueCategoryError;
+                if (vibeError) throw vibeError;
 
-                setVenueCategory(venueCategoryData);
-                setName(venueCategoryData.category_name);
-                setDescription(venueCategoryData.description);
-                setSeqInMenu(venueCategoryData.seq_in_menu);
+                setVibe(vibeData);
+                setName(vibeData.vibe_name);
+                setDescription(vibeData.description);
+                setSeqInMenu(vibeData.seq_in_menu);
             } catch (error) {
-                console.error("Error fetching venue category data:", error.message);
+                console.error("Error fetching vibe data:", error.message);
             }
         };
 
-        fetchVenueCategoryData();
+        fetchVibeData();
     }, [id]);
 
     const handleSubmit = async (e) => {
@@ -53,9 +52,9 @@ const EditVenueCategory = () => {
         try {
             // Update venue category data in the database
             const { error: updateError } = await supabase
-                .from("venue_category")
+                .from("vibe")
                 .update({
-                    category_name: name,
+                    vibe_name: name,
                     description: description,
                     seq_in_menu: seqInMenu,
                 })
@@ -63,18 +62,18 @@ const EditVenueCategory = () => {
 
             if (updateError) throw updateError;
 
-            showToast("Venue category updated successfully.", "success");
-            navigate("/admin/venuecategory");
+            showToast("Vibe updated successfully.", "success");
+            navigate("/admin/vibe");
         } catch (error) {
-            console.error("Error updating venue category:", error.message);
-            showToast("Failed to update venue category.", "error");
+            console.error("Error updating vibe:", error.message);
+            showToast("Failed to update vibe.", "error");
         }
     };
  
     return (
         <div className="edit-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/venuecategory" /> 
-            <h2>Edit Venue Category</h2>
+            <BackButton to="/admin/vibe" /> 
+            <h2>Edit Vibe</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -84,14 +83,14 @@ const EditVenueCategory = () => {
                 <div className="insider">
 
                     <PlainInput 
-                        label="Category Name"
+                        label="Vibe Name"
                         name="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
 
                     <TextArea 
-                        label="Category Description"
+                        label="Vibe Description"
                         name="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -112,4 +111,4 @@ const EditVenueCategory = () => {
     );
 };
 
-export default EditVenueCategory;
+export default EditVibe;

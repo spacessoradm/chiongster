@@ -8,10 +8,10 @@ import Toast from '../../../components/Toast';
 import PlainInput from '../../../components/Input/PlainInput';
 import SingleSelect from '../../../components/Input/SingleSelect';
 
-const ViewPackage = () => {
+const ViewTier = () => {
     const { id } = useParams();
     const navigate = useNavigate(); 
-    const [packages, setPackage] = useState("");
+    const [tier, setTier] = useState("");
     const [loading, setLoading] = useState(true);
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
@@ -21,35 +21,35 @@ const ViewPackage = () => {
     };
 
     useEffect(() => {
-        const fetchSinglePackage = async () => { 
+        const fetchSingleTier = async () => { 
             setLoading(true);
     
             try {
-                const { data: packageData, error: packageDataError } = await supabase
-                    .from("packages")
+                const { data: tierData, error: tierError } = await supabase
+                    .from("tiers")
                     .select("*")
                     .eq("id", id)
                     .single();
-                if (packageDataError) throw packageDataError;
+                if (tierError) throw tierError;
     
-                setPackage(packageData);
+                setTier(tierData);
     
             } catch (err) {
-                showToast("Failed to fetch package details.", "error");
+                showToast("Failed to fetch tier details.", "error");
             } finally {
                 setLoading(false);
             }
         };
     
-        fetchSinglePackage();
+        fetchSingleTier();
     }, [id]);
     
-    if (loading) return <p>Loading package...</p>;
+    if (loading) return <p>Loading tier...</p>;
 
     return (
         <div style={{ padding: "20px", fontFamily: "Courier New" }}>
-            <BackButton to="/admin/packages" />    
-            <h2>Package Details</h2>
+            <BackButton to="/admin/tiers" />    
+            <h2>Tier Details</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -59,26 +59,20 @@ const ViewPackage = () => {
                 <div className="insider">
 
                     <PlainInput
-                            label="Package Name:"
-                            value={packages.package_name}
+                            label="Name:"
+                            value={tier.name}
                             type="text"
                             readOnly
                     />
                     <PlainInput
-                            label="Price:"
-                            value={packages.price}
+                            label="Description:"
+                            value={tier.description}
                             type="text"
                             readOnly
                     />
                     <PlainInput
-                            label="Billing Cycle:"
-                            value={packages.billing_cycle}
-                            type="text"
-                            readOnly
-                    />
-                    <PlainInput
-                            label="Annual Billing:"
-                            value={packages.annual_billing}
+                            label="Color Code:"
+                            value={tier.color_code}
                             type="text"
                             readOnly
                     />
@@ -88,7 +82,7 @@ const ViewPackage = () => {
                                 { value: "enabled", label: "Enabled" },
                                 { value: "disabled", label: "Disabled" },
                             ]}
-                            selectedValue={packages.status}
+                            selectedValue={tier.status}
                             readOnly
                     />
 
@@ -99,4 +93,4 @@ const ViewPackage = () => {
     );
 };
 
-export default ViewPackage;
+export default ViewTier;

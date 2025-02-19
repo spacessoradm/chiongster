@@ -6,15 +6,13 @@ import './index.css';
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 import PlainInput from '../../../components/Input/PlainInput';
-import TextArea from '../../../components/Input/TextArea';
 import SingleSelect from '../../../components/Input/SingleSelect';
 
-const EditPackage = () => {
+const EditTier = () => {
     const { id } = useParams();
-    const [packageName, setPackageName] = useState("");
-    const [price, setPrice] = useState("");
-    const [billingCycle, setBillingCycle] = useState("");
-    const [annualBilling, setAnnualBilling] = useState("");
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [colorCode, setColorCode] = useState("");
     const [status, setStatus] = useState("");
     const navigate = useNavigate();
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
@@ -25,27 +23,26 @@ const EditPackage = () => {
     };
 
     useEffect(() => {
-        const fetchSinglePackage = async () => {
+        const fetchSingleTier = async () => {
             try {
-                const { data: packageData, error: packageError } = await supabase
-                    .from("packages")
+                const { data: tierData, error: tierError } = await supabase
+                    .from("tiers")
                     .select("*")
                     .eq("id", id)
                     .single();
 
-                if (packageError) throw packageError;
+                if (tierError) throw tierError;
 
-                setPackageName(packageData.package_name);
-                setPrice(packageData.price);
-                setBillingCycle(packageData.billing_cycle);
-                setAnnualBilling(packageData.annual_billing);
-                setStatus(packageData.status);
+                setName(tierData.name);
+                setDescription(tierData.description);
+                setColorCode(tierData.color_code);
+                setStatus(tierData.status);
             } catch (error) {
-                showToast("Error fetching package data", "error");
+                showToast("Error fetching tier data", "error");
             }
         };
 
-        fetchSinglePackage();
+        fetchSingleTier();
     }, [id]);
 
     const handleSubmit = async (e) => {
@@ -53,29 +50,28 @@ const EditPackage = () => {
 
         try {
             const { error: updateError } = await supabase
-                .from("packages")
+                .from("tiers")
                 .update({
-                    package_name: packageName,
-                    price: price,
-                    billing_cycle: billingCycle,
-                    annual_billing: annualBilling,
+                    name: name,
+                    description: description,
+                    color_code: colorCode,
                     status: status,
                 })
                 .eq("id", id);
 
             if (updateError) throw updateError;
 
-            showToast("Package updated successfully.", "success");
-            navigate("/admin/packages");
+            showToast("Tier updated successfully.", "success");
+            navigate("/admin/tiers");
         } catch (error) {
-            showToast("Failed to update package.", "error");
+            showToast("Failed to update tier.", "error");
         }
     };
  
     return (
         <div style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/packages" /> 
-            <h2>Edit Package</h2>
+            <BackButton to="/admin/tiers" /> 
+            <h2>Edit Tier</h2>
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -85,35 +81,26 @@ const EditPackage = () => {
                 <div className="insider">
 
                     <PlainInput
-                        label="Package Name:"
-                        value={packageName}
+                        label="Name:"
+                        value={name}
                         type="text"
-                        onChange={(e) => setPackageName(e.target.value)}
+                        onChange={(e) => setName(e.target.value)}
                         required
                     />
                     
                     <PlainInput
-                        label="Price:"
-                        value={price}
+                        label="Description:"
+                        value={description}
                         type="text"
-                        onChange={(e) => setPrice(e.target.value)}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+
+                    <PlainInput
+                        label="Color Code:"
+                        value={colorCode}
+                        type="text"
+                        onChange={(e) => setColorCode(e.target.value)}
                         required
-                    />
-
-                    <PlainInput
-                        label="Billing Cycle:"
-                        value={billingCycle}
-                        type="text"
-                        onChange={(e) => setBillingCycle(e.target.value)}
-                        
-                    />
-
-                    <PlainInput
-                        label="Annual Billing:"
-                        value={annualBilling}
-                        type="text"
-                        onChange={(e) => setAnnualBilling(e.target.value)}
-                        
                     />
                     
                     <SingleSelect
@@ -128,11 +115,10 @@ const EditPackage = () => {
                     />
 
                     <button type="submit" className="submit-btn">Submit</button>
-                
                 </div>
             </form>
         </div>
     );
 };
 
-export default EditPackage;
+export default EditTier;

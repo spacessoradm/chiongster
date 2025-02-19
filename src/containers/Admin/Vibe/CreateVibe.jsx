@@ -8,11 +8,11 @@ import Toast from '../../../components/Toast';
 import PlainInput from '../../../components/Input/PlainInput';
 import TextArea from '../../../components/Input/TextArea';
 
-const CreateVenueCategory = () => {
+const CreateVibe = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        categoryName: '',
-        categoryDescription: '',
+        vibeName: '',
+        Description: '',
         seqInMenu: '',
     });
     const [loading, setLoading] = useState(false);
@@ -38,25 +38,24 @@ const CreateVenueCategory = () => {
         setError(null);
 
         try {
-            // Insert new category into the 'venue_categories' table
-            const { error: categoryError } = await supabase
-                .from('venue_category')
+            const { error: vibeError } = await supabase
+                .from('vibe')
                 .insert([
                     {
-                        category_name: formData.categoryName,
-                        description: formData.categoryDescription,
+                        vibe_name: formData.vibeName,
+                        description: formData.Description,
                         seq_in_menu: formData.seqInMenu,
                     },
                 ]);
 
-            if (categoryError) throw categoryError;
+            if (vibeError) throw vibeError;
 
-            showToast('Venue category created successfully.', 'success')
+            showToast('Vibe created successfully.', 'success')
 
             // Navigate back to the venue categories list after successful creation
-            navigate('/admin/venuecategory');
+            navigate('/admin/vibe');
         } catch (error) {
-            showToast('Failed to create venue category.', 'error')
+            showToast('Failed to create vibe.', 'error')
             setError(error.message);
         } finally {
             setLoading(false);
@@ -65,8 +64,8 @@ const CreateVenueCategory = () => {
 
     return (
         <div className="create-venue-category-container" style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/venuecategory" />   
-            <h2>Create New Venue Category</h2> 
+            <BackButton to="/admin/vibe" />   
+            <h2>Create New Vibe</h2> 
 
             {toastInfo.visible && (
                 <Toast message={toastInfo.message} type={toastInfo.type} />
@@ -76,19 +75,18 @@ const CreateVenueCategory = () => {
                 <div className="insider">
 
                     <PlainInput 
-                        label="Category Name"
-                        name="categoryName"
-                        value={formData.categoryName}
-                        onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
+                        label="Name"
+                        name="vibeName"
+                        value={formData.vibeName}
+                        onChange={(e) => setFormData({ ...formData, vibeName: e.target.value })}
                         required
                     />
 
                     <TextArea 
-                        label="Category Description"
-                        name="categoryDescription"
-                        value={formData.categoryDescription}
-                        onChange={(e) => setFormData({ ...formData, categoryDescription: e.target.value })}
-                        required
+                        label="Description"
+                        name="Description"
+                        value={formData.Description}
+                        onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
                     />
 
                     <PlainInput 
@@ -108,4 +106,4 @@ const CreateVenueCategory = () => {
     );
 };
 
-export default CreateVenueCategory;
+export default CreateVibe;
