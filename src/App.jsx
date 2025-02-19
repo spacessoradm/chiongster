@@ -32,6 +32,11 @@ import CreateVenueCategory from './containers/Admin/Venue_Category/CreateVenueCa
 import ViewVenueCategory from './containers/Admin/Venue_Category/ViewVenueCategory';
 import EditVenueCategory from './containers/Admin/Venue_Category/EditVenueCategory';
 
+import Vibes from './containers/Admin/Vibe/index.jsx';
+import CreateVibe from './containers/Admin/Vibe/CreateVibe';
+import ViewVibe from './containers/Admin/Vibe/ViewVibe';
+import EditVibe from './containers/Admin/Vibe/EditVibe';
+
 import Venues from './containers/Admin/Venues/index.jsx';
 import CreateVenue from './containers/Admin/Venues/CreateVenue';
 //import ViewVenue from './containers/Admin/Venues/ViewVenue';
@@ -101,6 +106,12 @@ import Packages from './containers/Admin/Packages/index.jsx';
 import CreatePackage from './containers/Admin/Packages/CreatePackage.jsx';
 import ViewPackage from './containers/Admin/Packages/ViewPackage.jsx';
 import EditPackage from './containers/Admin/Packages/EditPackage.jsx';
+
+import Tiers from './containers/Admin/Tiers/index.jsx';
+import CreateTier from './containers/Admin/Tiers/CreateTier.jsx';
+import ViewTier from './containers/Admin/Tiers/ViewTier.jsx';
+import EditTier from './containers/Admin/Tiers/EditTier.jsx';
+
 import { AuthClient } from '@supabase/supabase-js';
 
 const App = () => {
@@ -235,6 +246,39 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditVenueCategory/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/vibe"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Vibes />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/vibe/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateVibe />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/vibe/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewVibe />
+                                    </AdminLayout>
+                                }
+                            />
+                            <Route
+                                path="/admin/vibe/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditVibe />
                                     </AdminLayout>
                                 }
                             />
@@ -698,6 +742,42 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditPackage/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route 
+                                path="/admin/tiers"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <Tiers />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/tiers/create"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateTier />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/tiers/view/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <ViewTier/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/tiers/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditTier/>
                                     </AdminLayout>
                                 }
                             />
