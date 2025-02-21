@@ -41,6 +41,7 @@ import Venues from './containers/Admin/Venues/index.jsx';
 import CreateVenue from './containers/Admin/Venues/CreateVenue';
 //import ViewVenue from './containers/Admin/Venues/ViewVenue';
 import EditVenue from './containers/Admin/Venues/EditVenue';
+import CreateRandomGallery from './containers/Admin/Venues/CreateRandomGallery';
 import CreateVenueGallery from './containers/Admin/Venues/CreateGallery';
 import AddVenuePromotion from './containers/Admin/Venues/CreatePromotion';
 import EditDamage from './containers/Admin/Venues/EditDamage';
@@ -70,6 +71,7 @@ import EditRedeemItem from './containers/Admin/Redeem_Items/EditRedeemItem';
 
 import Banners from './containers/Admin/Banners/index.jsx';
 import CreateBanner from './containers/Admin/Banners/CreateBanner';
+import EditBanner from './containers/Admin/Banners/EditBanner';
 
 import Languages from './containers/Admin/Languages/index.jsx';
 import CreateLanguage from './containers/Admin/Languages/CreateLanguage';
@@ -309,6 +311,15 @@ const App = () => {
                             />
 
                             <Route
+                                path="/admin/venues/createrandom/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <CreateRandomGallery />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
                                 path="/admin/venues/create/:id"
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
@@ -507,6 +518,15 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <CreateBanner />
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/banners/edit/:id"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditBanner />
                                     </AdminLayout>
                                 }
                             />
