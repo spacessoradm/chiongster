@@ -27,6 +27,7 @@ const CreateVenue = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [formData, setFormData] = useState({
         venue_name: "",
+        display_address: "",
         address: "",
         latitude: "",
         longitude: "",
@@ -113,6 +114,7 @@ const CreateVenue = () => {
             .from("venues")
             .insert({
               venue_name: formData.venue_name,
+              display_address: formData.display_address,
               address: formData.address,
               latitude: formData.latitude,
               longitude: formData.longitude,
@@ -224,7 +226,7 @@ const CreateVenue = () => {
       };
 
   
-      const getCoordinates = async (address) => {
+    const getCoordinates = async (address) => {
         const apiKey = import.meta.env.VITE_OPENCAGE_API_KEY; // Secure API key in .env
         const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${apiKey}`;
     
@@ -390,6 +392,14 @@ const CreateVenue = () => {
                         label="Venue Name:"
                         value={formData.venue_name}
                         onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                        required
+                    />
+
+                    <TextArea
+                        label="Display Address:"
+                        value={formData.display_address}
+                        onChange={(e) => setFormData({ ...formData, display_address: e.target.value })}
+                        rows={5} 
                         required
                     />
 

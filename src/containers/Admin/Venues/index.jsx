@@ -245,6 +245,12 @@ const Venues = () => {
                                         className='create-button'
                                         />
 
+                                    <FaFileImage 
+                                        onClick={() => navigate(`/admin/venues/createrandom/${venue.id}`)}
+                                        title='Random Gallery'
+                                        className='create-button'
+                                        />
+
                                         <FaGripVertical 
                                         onClick={() => navigate(`/admin/venues/addpromotion/${venue.id}`)}
                                         title='Promotion'

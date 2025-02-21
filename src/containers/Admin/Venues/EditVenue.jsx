@@ -85,6 +85,7 @@ const EditVenue = () => {
 
                 setFormData({
                     venue_name: venue.venue_name,
+                    display_address: venue.display_address,
                     address: venue.address,
                     opening_hours: venue.opening_hours,
                     happy_hours: venue.happy_hours,
@@ -178,6 +179,7 @@ const EditVenue = () => {
                 .from("venues")
                 .update({
                     venue_name: formData.venue_name,
+                    display_address: formData.display_address,
                     address: formData.address,
                     latitude: formData.latitude,
                     longitude: formData.longitude,
@@ -295,9 +297,18 @@ const EditVenue = () => {
                     />
 
                     <TextAreaInput
+                        label="Display Address"
+                        value={formData.display_address}
+                        onChange={(e) => setFormData({ ...formData, display_address: e.target.value })}
+                        rows={5}
+                        required
+                    />
+
+                    <TextAreaInput
                         label="Address"
                         value={formData.address}
                         onChange={handleAddressChange}
+                        rows={5}
                         required
                     />
 

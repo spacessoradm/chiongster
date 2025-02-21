@@ -6,13 +6,12 @@ import './index.css';
 import SearchBar from '../../../components/SearchBarSection';
 import Toast from '../../../components/Toast';
 import Pagination from '../../../components/pagination';
-import throttleByAnimationFrame from 'antd/es/_util/throttleByAnimationFrame';
 
 const Banner = () => {
   const navigate = useNavigate();
 
   const [banners, setBanners] = useState([]);
-  const [imagePaths, setImagePaths] = useState([]);
+  const [imagePaths, setImagePaths] = useState(null);
   const [filteredBanners, setFilteredBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,26 +35,13 @@ const Banner = () => {
       const end = start + limit - 1;
 
       const { data: bannersData, error: bannersError } = await supabase
-        .from('images_path')
+        .from('banner')
         .select('*')
-        .eq('type', 'Banner')
         .range(start, end);
 
       if (bannersError) throw bannersError;
 
-      // Extract and parse image paths from all rows
-      const imagePaths = bannersData
-      .map((row) =>
-        Array.isArray(row.image_path)
-          ? row.image_path
-          : row.image_path
-          ? JSON.parse(row.image_path || '[]')
-          : []
-      )
-      .flat(); // Flatten to combine all paths into a single array
-
-      setImagePaths(imagePaths);
-      console.log('Extracted image paths:', imagePaths);
+      setImagePaths(bannersData.image_path);
 
       setBanners(bannersData);
       setFilteredBanners(bannersData);
@@ -176,20 +162,22 @@ const Banner = () => {
                 <tr key={banner.id}>
                   <td className='normal-column'>{banner.id}</td>
                   <td className='normal-column'>{banner.type}</td>
-                  <td className='normal-column'>
-                  {imagePaths.map((path, index) => (
+                  <td className='normal-column'>  
                     <img
-                      key={index}
-                      src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/banner/${path}`}
+                      src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/banner/${banner.image_path}`}
                       style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "8px" }}
-                      alt={`Banner ${index + 1}`}
+                      alt="Banner"
                     />
-                  ))}
                   </td>
                   <td className='normal-column'>{banner.created_at}</td>
                   <td className='action-column'>
+                    <FaEdit 
+                      onClick={() => navigate(`/admin/banners/edit/${banner.id}`)}
+                      title='Edit'
+                      className='edit-button'
+                    />
                     <FaTrashAlt 
-                      onClick={() => deleteBanner(banner.id, imagePaths)}
+                      onClick={() => deleteBanner(banner.id, banner.image_path)}
                       title='Delete'
                       className='delete-button'
                     />

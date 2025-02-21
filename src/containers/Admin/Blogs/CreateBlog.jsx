@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from "react-select";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import supabase from '../../../config/supabaseClient';
 
 import './CreateBlog.css';
@@ -13,34 +15,44 @@ const CreateBlog = () => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        tags_id: '',
-        status: '',
+        tags_id: [],
         image_path: '',
     });
+
     const [blogTags, setBlogTags] = useState([]);
     const [loading, setLoading] = useState(false);
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
     const showToast = (message, type) => {
         setToastInfo({ visible: true, message, type });
-        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000); // Auto-hide
+        setTimeout(() => setToastInfo({ visible: false, message: '', type: '' }), 3000);
     };
+
+
+    useEffect(() => {
+        setFormData(prevState => ({
+            ...prevState,
+            content: prevState.content || '' // Ensure default state
+        }));
+    }, []);
+    
 
     useEffect(() => {
         const fetchBlogTags = async () => {
             try {
+                const { data, error } = await supabase
+                    .from("blog_tags")
+                    .select("*")
+                    .eq("status", 'enabled');
+                
+                if (error) throw error;
 
-                const { data: blogTagsData, error: blogTagsDataError } = 
-                    await supabase.from("blog_tags").select("*").eq("status", 'enabled');
-                if (blogTagsDataError) throw blogTagsDataError;
-                setBlogTags(
-                    blogTagsData.map((tag) => ({
-                        value: tag.id,
-                        label: tag.tag_name,
-                    }))
-                );
+                setBlogTags(data.map(tag => ({
+                    value: tag.id,
+                    label: tag.tag_name,
+                })));
             } catch (err) {
-                showToast(`Error fetching blog tags: ${err.message}`, 'error')
+                showToast(`Error fetching blog tags: ${err.message}`, 'error');
             }
         };
 
@@ -54,51 +66,94 @@ const CreateBlog = () => {
         });
     };
 
+    const handleContentChange = (value) => {
+        setFormData((prev) => ({ ...prev, content: value }));
+    };
+    
+    
+
+    const handleImageUpload = async () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}.${fileExt}`;
+            const filePath = `blogcontent/${fileName}`;
+
+            let { error } = await supabase.storage.from('blogcontent').upload(filePath, file);
+
+            if (error) {
+                showToast(`Image upload failed: ${error.message}`, 'error');
+                return;
+            }
+
+            const { data } = supabase.storage.from('blogcontent').getPublicUrl(filePath);
+            if (data) {
+                const url = data.publicUrl;
+                const quill = document.querySelector('.ql-editor');
+                const range = quill.getSelection();
+                quill.insertEmbed(range.index, 'image', url);
+            }
+        };
+    };
+
+    const quillModules = {
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'image'],  // Image upload button
+                ['clean']
+            ],
+            handlers: {
+                image: handleImageUpload
+            }
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        console.log(formData.image_path);
-
         try {
-            const { error: blogError } = await supabase
+            const { error } = await supabase
                 .from('blogs')
                 .insert([
                     {
                         title: formData.title,
-                        content: formData.content,
+                        content: formData.content,  // Stored as HTML
                         tags_id: formData.tags_id,
-                        publisher_id: 0, 
                         image_path: formData.image_path,
                         created_at: new Date().toISOString(),
                         modified_at: new Date().toISOString(),
                     },
                 ]);
 
-            if (blogError) throw blogError;
+            if (error) throw error;
 
-            showToast('Blog created successfully.', 'success')
+            showToast('Blog created successfully.', 'success');
             navigate('/admin/blogs');
         } catch (error) {
-            showToast(`Failed to create blog: ${error.message}`, 'error')
-            //setError();
+            showToast(`Failed to create blog: ${error.message}`, 'error');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleImageUpload = (url) => {
-        setFormData((prev) => ({ ...prev, image_path: url }));
-      };
-
     return (
         <div style={{ fontFamily: "Courier New" }}>
-            <BackButton to="/admin/blogs" />   
-            <h2>Create New Blog</h2> 
+            <BackButton to="/admin/blogs" />
+            <h2>Create New Blog</h2>
 
-            {toastInfo.visible && (
-                <Toast message={toastInfo.message} type={toastInfo.type} />
-            )}
+            {toastInfo.visible && <Toast message={toastInfo.message} type={toastInfo.type} />}
 
             <form onSubmit={handleSubmit} className="outsider">
                 <div className="insider">
@@ -107,7 +162,6 @@ const CreateBlog = () => {
                         <input
                             className='enhanced-input'
                             type="text"
-                            id="title"
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
@@ -116,39 +170,52 @@ const CreateBlog = () => {
                     </div>
 
                     <div className="field-container">
-                        <label htmlFor="categoryDescription">Content:</label>
-                        <textarea
-                            id="content"
-                            name="content"
-                            value={formData.content}
-                            onChange={handleChange}
-                            required
-                            className="enhanced-input"
-                        ></textarea>
-                    </div>
-
-                    <div className="field-container">
                         <label>Tag:</label>
                         <Select
-                            options={blogTags} // Pass the fetched languages
-                            isMulti // Enable multi-select
-                            value={blogTags.filter((option) =>
-                                (formData.tags_id || []).includes(option.value)
-                            )} // Match selected values with formData
+                            options={blogTags}
+                            isMulti
+                            value={blogTags.filter(option => formData.tags_id.includes(option.value))}
                             onChange={(selectedOptions) =>
                                 setFormData({
-                                ...formData,
-                                tags_id: selectedOptions.map((option) => option.value), // Update formData with selected IDs
+                                    ...formData,
+                                    tags_id: selectedOptions.map(option => option.value),
                                 })
                             }
-                            placeholder="Choose at least one recommended tag"
-                            className="mt-1 block w-full text-black"
-                            classNamePrefix="react-select" // Optional styling customization
+                            placeholder="Choose at least one tag"
+                            classNamePrefix="react-select"
                         />
                     </div>
 
-                    <CreateBlogImage onUpload={handleImageUpload} />
+                    <div className="field-container">
+                        <label>Content:</label>
+                        <ReactQuill
+                            theme="snow"
+                            value={formData.content}  // Controlled component
+                            onChange={handleContentChange}
+                            modules={{
+                                toolbar: [
+                                    [{ header: [1, 2, false] }],
+                                    ["bold", "italic", "underline"],
+                                    [{ list: "ordered" }, { list: "bullet" }],
+                                    ["link", "image"],
+                                ],
+                            }}
+                            formats={[
+                                "header",
+                                "bold",
+                                "italic",
+                                "underline",
+                                "list",
+                                "bullet",
+                                "link",
+                                "image",
+                            ]}
+                            className="enhanced-input"
+                        />
+                    </div>
 
+
+                    <CreateBlogImage onUpload={(url) => setFormData({ ...formData, image_path: url })} />
 
                     <button type="submit" className="create-btn" disabled={loading}>
                         {loading ? 'Creating...' : 'Create'}

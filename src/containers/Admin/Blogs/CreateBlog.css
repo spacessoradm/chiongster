@@ -49,3 +49,12 @@ label {
     padding: 12px;
     margin: 16px;
   }
+
+  .ql-container {
+    height: 200px !important;
+}
+
+.ql-editor {
+    min-height: 150px;
+    font-size: 16px;
+}
