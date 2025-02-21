@@ -35,6 +35,7 @@
     "react-multi-select-component": "^4.3.4",
     "react-onesignal": "^3.0.1",
     "react-qr-scanner": "^1.0.0-alpha.11",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^7.0.1",
     "react-select": "^5.10.0",
     "react-swipeable": "^7.0.2",
