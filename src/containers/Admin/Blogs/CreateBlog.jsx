@@ -5,7 +5,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import supabase from '../../../config/supabaseClient';
 
-import './CreateBlog.css';
+import './index.css';
 import BackButton from '../../../components/Button/BackArrowButton';
 import Toast from '../../../components/Toast';
 import CreateBlogImage from '../../../components/Input/ImageUpload/CreateBlogImage';
