@@ -114,6 +114,11 @@ const adminNavBarItems = [
                 link: "/admin/vibe",
                 icon: <FaListAlt />,
             },
+            {
+                title: "Sorting",
+                link: "/admin/home-sorting",
+                icon: <FaListAlt />,
+            },
         ]
     },
 ];
