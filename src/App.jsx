@@ -114,6 +114,8 @@ import CreateTier from './containers/Admin/Tiers/CreateTier.jsx';
 import ViewTier from './containers/Admin/Tiers/ViewTier.jsx';
 import EditTier from './containers/Admin/Tiers/EditTier.jsx';
 
+import EditSorting from './containers/Admin/Home_Sorting/index.jsx';
+
 import { AuthClient } from '@supabase/supabase-js';
 
 const App = () => {
@@ -798,6 +800,15 @@ const App = () => {
                                 element={
                                     <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
                                         <EditTier/>
+                                    </AdminLayout>
+                                }
+                            />
+
+                            <Route 
+                                path="/admin/home-sorting"
+                                element={
+                                    <AdminLayout isCollapsed={isCollapsed} toggleSidebar={toggleSidebar}>
+                                        <EditSorting/>
                                     </AdminLayout>
                                 }
                             />
