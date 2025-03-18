@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import supabase from "../../../config/supabaseClient";
 import { FaEdit, } from "react-icons/fa";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 import "./index.css";
 import BackButton from '../../../components/Button/BackArrowButton';
@@ -114,6 +116,8 @@ const EditVenue = () => {
                     event_pic_path: venue.event_pic_path,
                     promotion_pic_path: venue.promotion_pic_path,
                 });
+
+                console.log(formData.venue_name)
             } catch (error) {
                 console.error("Error fetching venue data:", error.message);
             }
@@ -473,11 +477,13 @@ const EditVenue = () => {
                         onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
                     />
 
-                    <TextAreaInput
-                        label="Minimum Tips"
-                        value={formData.minimum_tips}
-                        onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
-                    />
+                    <div className="field-container">
+                        <label>Minimum Tips:</label>
+                        <ReactQuill
+                          value={formData.minimum_tips}
+                          onChange={(content) => setFormData({ ...formData, minimum_tips: content })}
+                        />
+                    </div>
 
                     <div className="field-container">
                         <label>Vibe:</label>

@@ -9,10 +9,13 @@ import Toast from '../../../components/Toast';
 const CreateRandomGallery = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    
+    // States
     const [galleriesURL, setGalleriesURL] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
     const [updatedImages, setUpdatedImages] = useState({});
     const [newImages, setNewImages] = useState([]);
+    const [randNumber, setRandNumber] = useState("");  // NEW STATE for rand_number
     const [loading, setLoading] = useState(false);
     const [toastInfo, setToastInfo] = useState({ visible: false, message: '', type: '' });
 
@@ -26,7 +29,7 @@ const CreateRandomGallery = () => {
             try {
                 const { data, error } = await supabase
                     .from("images_path")
-                    .select("image_path")
+                    .select("image_path, no_of_display")  // Fetch rand_number
                     .eq("venue_id", id)
                     .eq("type", "RandomGallery")
                     .single();
@@ -35,6 +38,7 @@ const CreateRandomGallery = () => {
 
                 const parsedImages = data?.image_path ? JSON.parse(data.image_path) : [];
                 setGalleriesURL(parsedImages);
+                setRandNumber(data?.no_of_display || "");  // Store rand_number
             } catch (error) {
                 console.error("Error fetching gallery:", error.message);
             }
@@ -70,12 +74,12 @@ const CreateRandomGallery = () => {
             // 1. Check if the record exists
             const { data: existingRecord, error: fetchError } = await supabase
                 .from("images_path")
-                .select("id") // Only fetch the ID to check if it exists
+                .select("id")
                 .eq("venue_id", id)
                 .eq("type", "RandomGallery")
                 .single();
     
-            if (fetchError && fetchError.code !== "PGRST116") throw fetchError; // Ignore "No rows found" error
+            if (fetchError && fetchError.code !== "PGRST116") throw fetchError; 
     
             // 2. Delete Images from Storage
             if (deletedImages.length > 0) {
@@ -107,23 +111,23 @@ const CreateRandomGallery = () => {
                 updatedGallery[index] = data.path;
             }
     
-            // 5. Save Final Image Paths
+            // 5. Save Final Image Paths & rand_number
             const finalImagePaths = [...updatedGallery, ...uploadedNewImages];
     
             if (existingRecord) {
-                // Update if record exists
+                // Update existing record
                 const { error } = await supabase
                     .from("images_path")
-                    .update({ image_path: finalImagePaths })
+                    .update({ image_path: finalImagePaths, no_of_display: randNumber })  // Store rand_number
                     .eq("venue_id", id)
                     .eq("type", "RandomGallery");
     
                 if (error) throw error;
             } else {
-                // Insert if record does not exist
+                // Insert new record
                 const { error } = await supabase
                     .from("images_path")
-                    .insert([{ venue_id: id, type: "RandomGallery", image_path: finalImagePaths }]);
+                    .insert([{ venue_id: id, type: "RandomGallery", image_path: finalImagePaths, no_of_display: randNumber }]);
     
                 if (error) throw error;
             }
@@ -137,7 +141,6 @@ const CreateRandomGallery = () => {
             setLoading(false);
         }
     };
-    
 
     return (
         <div className="create-venue-category-container">
@@ -149,10 +152,22 @@ const CreateRandomGallery = () => {
             <form onSubmit={handleSubmit} className="outsider">
                 <div className="insider">
                     <div className="field-container">
-                        <label>Existing Gallery</label>
+                        
                         <div className="flex flex-wrap gap-4 mt-4 w-full max-w-[500px] border p-2">
+                            <div className="flex field-container" style={{ paddingTop: '12px', paddingBottom: '12px'}}>
+                                <label>Number of Display</label>
+                                <input
+                                    type="text"
+                                    value={randNumber}  // Show rand_number
+                                    onChange={(e) => setRandNumber(e.target.value)}
+                                    className="enhanced-input"
+                                />
+                            </div>
+
+                            <label>Existing Gallery</label>
                             {galleriesURL.map((image, index) => (
                                 <div key={index} className="relative">
+
                                     <img
                                         src={
                                             updatedImages[index]
@@ -182,31 +197,7 @@ const CreateRandomGallery = () => {
                                             x
                                         </button>
                                     </div>
-
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="field-container">
-                        <label>Add New Images:</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleNewImages}
-                            className="block w-full text-sm text-gray-500 file:py-2 file:px-4 file:rounded-lg file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-
-                        <div className="flex flex-wrap gap-4 mt-4 w-full max-w-[500px] border p-2">
-                            {newImages.map((image, index) => (
-                                <img
-                                    key={index}
-                                    src={URL.createObjectURL(image)}
-                                    alt={`Preview ${index + 1}`}
-                                    className="rounded-lg object-cover"
-                                    style={{ width: "150px", height: "150px" }}
-                                />
                             ))}
                         </div>
                     </div>

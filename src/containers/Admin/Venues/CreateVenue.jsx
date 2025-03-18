@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../../config/supabaseClient";
 import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 import "./index.css";
 import BackButton from '../../../components/Button/BackArrowButton';
@@ -527,11 +529,13 @@ const CreateVenue = () => {
                         onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
                     />
 
-                    <PlainInput
-                        label="Minimum Tips:"
-                        value={formData.minimum_tips}
-                        onChange={(e) => setFormData({ ...formData, minimum_tips: e.target.value })}
-                    />
+                    <div className="field-container">
+                        <label>Minimum Tips:</label>
+                        <ReactQuill
+                          value={formData.minimum_tips}
+                          onChange={(content) => setFormData({ ...formData, minimum_tips: content })}
+                        />
+                    </div>
 
                     <ImageUpload onUpload={handleImageUpload} />
 
